@@ -1,0 +1,28 @@
+{
+  "name": "seconddad",
+  "version": "1.0.0",
+  "description": "build a bot to understand the ms bot framework",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HesselWellema/SecondDad.git"
+  },
+  "keywords": [
+    "dad",
+    "mom",
+    "bot"
+  ],
+  "author": "Hessel Wellema",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HesselWellema/SecondDad/issues"
+  },
+  "homepage": "https://github.com/HesselWellema/SecondDad#readme",
+  "dependencies": {
+    "botbuilder": "^3.3.3",
+    "restify": "^4.1.1"
+  }
+}
