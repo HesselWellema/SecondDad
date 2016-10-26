@@ -28,9 +28,33 @@ server.post('/api/messages', connector.listen());
 // Bots Dialogs
 //=========================================================
 
-bot.dialog('/', function (session) {
-    session.send("Hello World");
-    session.send("What are your options?");
-    builder.Prompts.choice(session, "Which color?", "red|green|blue");
-    builder.Prompts.choice(session, "Which color?", ["red","green","blue"]);
+bot.add('/', function (session) {
+    if (!session.userData.name) {
+        session.beginDialog('/profile');
+    } else {
+        session.send('Hello %s!', session.userData.name);
+    }
+    session.beginDialog('/Options')
 });
+bot.add('/profile', [
+    function (session) {
+        builder.Prompts.text(session, 'Hi! What is your name?');
+    },
+    function (session, results) {
+        session.userData.name = results.response;
+        session.endDialog();
+    }
+]);
+bot.add('/Options', [
+function(session) {
+    builder.Prompts.choice(session, "What would you like to do today %s?", "Zoo|School|Playground", session.userData.name);
+},
+function (session, results) {
+    if (results.response) {
+        session.send("Do you really want to go to the %s %s?" , results, session.userData.name); 
+        } else {
+            session.send("ok");
+        }
+    session.endDialog();
+}
+]);
