@@ -33,7 +33,7 @@ bot.dialog('/', function (session) {
         session.beginDialog('/profile');
     } else {
         session.send('Hello %s!', session.userData.name);
-        session.beginDialog('/Options')
+        session.beginDialog('/options')
     }
     
 });
@@ -46,7 +46,7 @@ bot.dialog('/profile', [
         session.endDialog();
     }
 ]);
-bot.dialog('/Options', [
+bot.dialog('/options', [
 function(session) {
     builder.Prompts.choice(session, "What would you like to do today %s?", "Zoo|School|Playground", session.userData.name);
 },
