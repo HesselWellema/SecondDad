@@ -16,8 +16,8 @@
             ],
             "env": {
                 "NODE_ENV": "development",
-                "MY_APP_SECRET": "vXaprCtnAAzgRJuGRpTGGgJ",
-                "MY_APP_ID": "27d70f4d-ce78-4456-8ecf-08d517e9c023"
+                "MY_APP_SECRET": "AvXaprCtnAAzgRJuGRpTGGgJ",
+                "MY_APP_ID": "A27d70f4d-ce78-4456-8ecf-08d517e9c023"
             },
             "console": "internalConsole",
             "sourceMaps": false,
