@@ -33,8 +33,9 @@ bot.dialog('/', function (session) {
         session.beginDialog('/profile');
     } else {
         session.send('Hello %s!', session.userData.name);
+        session.beginDialog('/Options')
     }
-    session.beginDialog('/Options')
+    
 });
 bot.dialog('/profile', [
     function (session) {
