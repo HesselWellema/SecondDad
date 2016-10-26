@@ -48,11 +48,11 @@ bot.dialog('/profile', [
 ]);
 bot.dialog('/options', [
 function(session) {
-    builder.Prompts.choice(session, "What would you like to do today %s?", "Zoo|School|Playground", session.userData.name);
+    builder.Prompts.choice(session, "What would you like to do today?", "Zoo|School|Playground");
 },
 function (session, results) {
     if (results.response) {
-        session.send("Do you really want to go to the %s %s?" , results, session.userData.name); 
+        session.send("Do you really want to go to the %s?" , results); 
         } else {
             session.send("ok");
         }
