@@ -28,7 +28,7 @@ server.post('/api/messages', connector.listen());
 // Bots Dialogs
 //=========================================================
 
-bot.add('/', function (session) {
+bot.dialog('/', function (session) {
     if (!session.userData.name) {
         session.beginDialog('/profile');
     } else {
@@ -36,7 +36,7 @@ bot.add('/', function (session) {
     }
     session.beginDialog('/Options')
 });
-bot.add('/profile', [
+bot.dialog('/profile', [
     function (session) {
         builder.Prompts.text(session, 'Hi! What is your name?');
     },
@@ -45,7 +45,7 @@ bot.add('/profile', [
         session.endDialog();
     }
 ]);
-bot.add('/Options', [
+bot.dialog('/Options', [
 function(session) {
     builder.Prompts.choice(session, "What would you like to do today %s?", "Zoo|School|Playground", session.userData.name);
 },
