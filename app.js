@@ -30,4 +30,7 @@ server.post('/api/messages', connector.listen());
 
 bot.dialog('/', function (session) {
     session.send("Hello World");
+    session.send("What are your options?");
+    builder.Prompts.choice(session, "Which color?", "red|green|blue");
+    builder.Prompts.choice(session, "Which color?", ["red","green","blue"]);
 });
