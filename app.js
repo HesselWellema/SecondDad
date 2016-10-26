@@ -22,10 +22,7 @@ var connector = new builder.ChatConnector
 var bot = new builder.UniversalBot(connector);
 server.post('/api/messages', connector.listen());
 
-
-
 // Create bot dialogs based on intenst
-
 
 var intents = new builder.IntentDialog();
 bot.dialog('/', intents);
@@ -52,30 +49,13 @@ intents.onDefault([
     }
 ]);
 
-bot.dialog('/ensureProfile', [
-    function (session, args, next) {
-        session.dialogData.profile = args || {};
-        if (!session.dialogData.profile.name) {
-            builder.Prompts.text(session, "What's your name?");
-        } else {
-            next();
-        }
-    },
-    function (session, results, next) {
-        if (results.response) {
-            session.dialogData.profile.name = results.response;
-        }
-        if (!session.dialogData.profile.city) {
-            builder.Prompts.text(session, "Where do you live??");
-        } else {
-            next();
-        }
+bot.dialog('/profile', [
+    function (session) {
+        builder.Prompts.text(session, 'Hi! What is your name?');
     },
     function (session, results) {
-        if (results.response) {
-            session.dialogData.profile.city = results.response;
-        }
-        session.endDialogWithResult({ response: session.dialogData.profile });
+        session.userData.name = results.response;
+        session.endDialog();
     }
 ]);
 
