@@ -24,6 +24,6 @@ server.post('/api/messages', connector.listen());
 
 // Create bot dialogs
 bot.dialog('/', function (session) {
-    session.send("Hello World");
+    session.send("You can ask me anything. I will in most cases reply with 42");
 });
 
