@@ -1,34 +1,29 @@
-// Add your requirements
-
-var restify = require('restify'); 
-var builder = require('botbuilder'); 
-
-// Setup Restify Server
-var server = restify.createServer();
-server.listen(process.env.PORT || 3000, function() 
-{
-   console.log('%s listening to %s', server.name, server.url); 
-});
-
-//where to start?
-server.get('/', restify.serveStatic({
- directory: __dirname,
- default: '/index.html'
-}));
-
-// Create chat bot
-var connector = new builder.ChatConnector
-({ appId: process.env.MY_APP_ID, appPassword: process.env.MY_APP_SECRET}); 
-var bot = new builder.UniversalBot(connector);
-server.post('/api/messages', connector.listen());
-
-// Create LUIS recognizer 
-var model = 'https://api.projectoxford.ai/luis/v1/application?id=0bc7c9f8-d37d-4298-a246-93e2e8a7b2ce&subscription-key=ea27b6d8709c4597b389de3cf26895f9';
-var recognizer = new builder.LuisRecognizer(model);
-var dialog = new builder.IntentDialog({ recognizers: [recognizer] });
-bot.dialog('/', dialog);
-
-// Add intent handlers
-dialog.matches('change name', builder.DialogAction.send('name changed'));
-dialog.matches('opzouten', builder.DialogAction.send('Zout zelf op!!'));
-dialog.onDefault(builder.DialogAction.send("I'm sorry I didn't understand. I can only understant so much'));
+//Add your requirements 
+2 var restify = require('restify'); 
+3 var builder = require('botbuilder'); 
+4 
+ 
+5 var appId = process.env.MY_APP_ID || "Missing your app ID"; 
+6 var appSecret = process.env.MY_APP_SECRET || "Missing your app secret"; 
+7 
+ 
+8 // Create bot and add dialogs 
+9 var bot = new builder.BotConnectorBot 
+10 ({appId: process.env.MY_APP_ID, appSecret: process.env.MY_APP_SECRET}); 
+11 bot.add('/', new builder.SimpleDialog( function (session) { 
+12 session.send('Hello World'); 
+13 })); 
+14 
+ 
+15 // Setup Restify Server 
+16 var server = restify.createServer(); 
+17 server.post('/api/messages', bot.verifyBotFramework(), bot.listen()); 
+18 server.listen(process.env.port || 3000, function () { 
+19 console.log('%s listening to %s', server.name, server.url); 
+20 }); 
+21 
+ 
+22 server.get('/', restify.serveStatic({ 
+23     directory: __dirname, 
+24     default: '/index.html' 
+25 })); 
