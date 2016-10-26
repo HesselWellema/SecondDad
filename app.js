@@ -22,16 +22,36 @@ var connector = new builder.ChatConnector
 var bot = new builder.UniversalBot(connector);
 server.post('/api/messages', connector.listen());
 
-// Create bot dialogs
-bot.dialog('/', [
+
+
+// Create bot dialogs based on intenst
+
+
+var intents = new builder.IntentDialog();
+bot.dialog('/', intents);
+
+intents.matches(/^change name/i, [
     function (session) {
-        session.beginDialog('/ensureProfile', session.userData.profile);
+        session.beginDialog('/profile');
     },
     function (session, results) {
-        session.userData.profile = results.response;
-        session.send('Hello %(name)s! I love %(city)s!', session.userData.profile);
+        session.send('Ok... Changed your name to %s', session.userData.name);
     }
 ]);
+
+intents.onDefault([
+    function (session, args, next) {
+        if (!session.userData.name) {
+            session.beginDialog('/profile');
+        } else {
+            next();
+        }
+    },
+    function (session, results) {
+        session.send('Hello %s!', session.userData.name);
+    }
+]);
+
 bot.dialog('/ensureProfile', [
     function (session, args, next) {
         session.dialogData.profile = args || {};
