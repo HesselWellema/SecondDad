@@ -37,18 +37,7 @@ bot.dialog('/', [
     function (session, results, next) {
         session.userData.profile = results.response;
         session.send('Hi %(naam)s! %(leeftijd)s jaar is al heel erg oud!', session.userData.profile);
-        next();
-        },
-    function (session,results) {
-        if (session.userData.profile.leeftijd > 10) {
-            session.beginDialog('/>10jaar');
-            session.send ('dat is dus %s', results)
-        } 
-        else {
-            session.beginDialog('/<10jaar');
         }
-    },
-        
 ]);
 
 //Profiel bepalen
@@ -59,7 +48,8 @@ bot.dialog('/ensureProfile', [
         console.log (session.dialogData.profile);
         if (!session.dialogData.profile.naam) {
             builder.Prompts.text(session, "Hoe heet je?");
-        } else {
+        } 
+        else {
             next();
         }
     },
