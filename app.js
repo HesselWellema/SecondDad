@@ -59,7 +59,7 @@ bot.dialog('/ensureProfile', [
             };
             
             if (!session.dialogData.profile.leeftijd) {
-                builder.Prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"],{maxRetries: 3}, {retryPrompt: "%s is geen leeftijd%s", respons});
+                builder.Prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"],{maxRetries: 3}, {retryPrompt: "Dat is geen leeftijd%s"});
             }
             else {
                 next();
