@@ -38,16 +38,20 @@ bot.dialog('/',
 
 //Profiel bepalen
 
-bot.dialog('/ensureProfile', 
+bot.dialog('/ensureProfile', [
     function (session, next) {
         if (!session.userData.naam) {
             builder.Prompts.text(session, "Hoe heet je?");
             session.userData.naam = results.response;
+        }
+        else {
+            next();
+        };
+    },     
+
+    function (session, next) {
             builder.Prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"]);
             session.userData.leeftijd = results.response;
             session.endDialog();
-        } 
-        else {
-            next();
         }
-    });
+    ]);
