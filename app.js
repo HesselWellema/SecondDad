@@ -34,7 +34,7 @@ bot.dialog('/',
     function (session) {
         session.beginDialog('/ensureProfile');
         session.send('Hi %(naam)s! %(leeftijd)s jaar is al heel erg oud!', session.userData.profile);
-        };
+        });
 
 //Profiel bepalen
 
@@ -50,4 +50,4 @@ bot.dialog('/ensureProfile',
         else {
             next();
         }
-    }
+    });
