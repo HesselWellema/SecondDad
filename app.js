@@ -59,7 +59,7 @@ bot.dialog('/ensureProfile', [
             };
             
             if (!session.dialogData.profile.leeftijd) {
-                builder.Prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"],options?maxRetries: 3, options?retryPrompt: "Dat is geen leeftijd. Geef ajb je leeftijd in");
+                builder.Prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"], options?maxRetries: 3, options?retryPrompt: "Probeer eens je leeftijd in te geven");
             }
             else {
                 next();
