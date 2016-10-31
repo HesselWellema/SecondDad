@@ -62,6 +62,5 @@ bot.dialog('/ensureProfile', [
         } else {
             next();
         }
-        session.endDialog();
     }
 ]);
