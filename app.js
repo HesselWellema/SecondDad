@@ -59,9 +59,14 @@ bot.dialog('/ensureProfile', [
         }
         if (!session.dialogData.profile.leeftijd) {
             builder.Prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"]);
-            session.dialogData.profile.leeftijd = results.response;
         } else {
             next();
         }
+    },
+    function (session, results) {   
+        if (results.response) {
+            session.dialogData.profile.leeftijd = results.response;
+        }
+        session.endDialog();
     }
 ]);
