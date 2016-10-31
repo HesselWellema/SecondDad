@@ -30,30 +30,24 @@ server.post('/api/messages', connector.listen());
 
 //root dialog
 
-bot.dialog('/', [
-    function (session,args,next) {
+bot.dialog('/', 
+    function (session) {
         session.beginDialog('/ensureProfile');
-    },
-    function (session, results) {
         session.send('Hi %(naam)s! %(leeftijd)s jaar is al heel erg oud!', session.userData.profile);
-        }
-]);
+        };
 
 //Profiel bepalen
 
-bot.dialog('/ensureProfile', [
+bot.dialog('/ensureProfile', 
     function (session, next) {
         if (!session.userData.naam) {
             builder.Prompts.text(session, "Hoe heet je?");
+            session.userData.naam = results.response;
+            builder.Prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"]);
+            session.userData.leeftijd = results.response;
+            session.endDialog();
         } 
         else {
             next();
         }
-    },
-    function (session, next) {
-        session.userData.naam = results.response;
-        builder.Prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"]);
-        session.userData.leeftijd = results.response;
-        session.endDialog();
     }
-]);
