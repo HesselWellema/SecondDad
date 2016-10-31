@@ -28,36 +28,56 @@ server.post('/api/messages', connector.listen());
 // Bots Dialogs
 //=========================================================
 
-bot.dialog('/', function (session) {
-    if (!session.userData.name) {
-        session.beginDialog('/profile');
-    } else {
-        session.send('Hello %s!', session.userData.name);
-        
-    };
-    session.beginDialog('/options');
-    session.send("ok");
-    
-});
-bot.dialog('/profile', [
+//root dialog
+
+bot.dialog('/', [
     function (session) {
-        builder.Prompts.text(session, 'Hi! What is your name?');
+        session.beginDialog('/ensureProfile', session.userData.profile);
     },
-    function (session, results) {
-        session.userData.name = results.response;
-        session.endDialog();
-    }
-]);
-bot.dialog('/options', [
-function(session) {
-    builder.Prompts.choice(session, "What would you like to do today?", "Zoo|School|Playground");
-},
-function (session, results) {
-    if (results.response) {
-        session.send("Do you really want to go to the %s?" , results); 
-        } else {
-            session.send("ok");
+    function (session, results, next) {
+        session.userData.profile = results.response;
+        session.send('Hi %(naam)s! %(leeftijd)s jaar is al heel erg oud!', session.userData.profile);
+        next();
+        },
+    function (session,results) {
+        if (session.userData.profile.leeftijd > 10) {
+            session.beginDialog('/>10jaar');
+            session.send ('dat is dus %s', results)
+        } 
+        else {
+            session.beginDialog('/<10jaar');
         }
-    session.endDialog();
-}
+    },
+        
+]);
+
+//Profiel bepalen
+
+bot.dialog('/ensureProfile', [
+    function (session, args, next) {
+        session.dialogData.profile = args || {};
+        console.log (session.dialogData.profile);
+        if (!session.dialogData.profile.naam) {
+            builder.Prompts.text(session, "Hoe heet je?");
+        } else {
+            next();
+        }
+    },
+    function (session, results, next) {
+        if (results.response) {
+            session.dialogData.profile.naam = results.response;
+        }
+        if (!session.dialogData.profile.leeftijd) {
+            builder.Prompts.text(session, "En hoe oud ben je?");
+            console.log (session.dialogData.profile);
+        } else {
+            next();
+        }
+    },
+    function (session, results) {   
+        if (results.response) {
+            session.dialogData.profile.leeftijd = results.response;
+        }
+        session.endDialogWithResult({ response: session.dialogData.profile });
+    }
 ]);
