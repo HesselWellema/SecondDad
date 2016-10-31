@@ -59,7 +59,6 @@ bot.dialog('/ensureProfile', [
         }
         if (!session.dialogData.profile.leeftijd) {
             builder.Prompts.text(session, "En hoe oud ben je?");
-            console.log (session.dialogData.profile);
         } else {
             next();
         }
@@ -68,6 +67,6 @@ bot.dialog('/ensureProfile', [
         if (results.response) {
             session.dialogData.profile.leeftijd = results.response;
         }
-        session.endDialogWithResult({ response: session.dialogData.profile });
+        session.endDialog();
     }
 ]);
