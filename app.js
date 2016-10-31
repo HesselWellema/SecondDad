@@ -30,28 +30,47 @@ server.post('/api/messages', connector.listen());
 
 //root dialog
 
-bot.dialog('/', 
+bot.dialog('/', [ 
     function (session) {
-        session.beginDialog('/ensureProfile');
+        session.beginDialog('/ensureProfile', session.userData.profile);
+    },
+    function (session,results) {
+        session.userData.profile = results.response;
         session.send('Hi %(naam)s! %(leeftijd)s jaar is al heel erg oud!', session.userData.profile);
-        });
+        }
+]);        
 
 //Profiel bepalen
 
 bot.dialog('/ensureProfile', [
-    function (session, next) {
-        if (!session.userData.naam) {
+    function (session, args, next) {
+        session.dialogData.profile = args || {};
+        if (!session.dialogData.profile.naam) {
             builder.Prompts.text(session, "Hoe heet je?");
-            session.userData.naam = results.response;
         }
         else {
             next();
         };
     },     
 
-    function (session, next) {
-            builder.Prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"]);
-            session.userData.leeftijd = results.response;
-            session.endDialog();
+    function (session,results,next) {
+            if (results.response) {
+                session.dialogData.profile.naam = results.response;
+            };
+            
+            if (!session.dialogData.profile.leeftijd) {
+                builder.Prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"]);
+            }
+            else {
+                next();
+            }
+    },                  
+
+function (session, results) {
+        if (results.response) {
+            session.dialogData.profile.leeftijd = results.response;
         }
+
+        session.endDialogWithResult({ response: session.dialogData.profile });
+    }
     ]);
