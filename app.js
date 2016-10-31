@@ -67,10 +67,7 @@ bot.dialog('/ensureProfile', [
     },                  
 
 function (session, results) {
-        if (results.response) {
-            session.dialogData.profile.leeftijd = results.response;
-        }
-
+        session.dialogData.profile.leeftijd = results.response;
         session.endDialogWithResult({ response: session.dialogData.profile });
     }
     ]);
