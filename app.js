@@ -89,7 +89,8 @@ function (session, results) {
 bot.dialog ('/guessingGame', [
     function (session,args) {
         session.dialogData.profile = args || {};
-        session.send('Ok %(naam)s! we gaan beginnen', session.dialogData.profile);
+        session.send('Ok we gaan beginnen. Je bent tenslotte al %s', session.dialogData.profile.leeftijd);
+        next();
     }
 
 ])
