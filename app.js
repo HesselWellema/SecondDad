@@ -37,7 +37,16 @@ bot.dialog('/', [
     function (session,results) {
         session.userData.profile = results.response;
         session.send('Hi %(naam)s! %(leeftijd)s jaar is al heel erg oud!', session.userData.profile);
-        }
+        },
+    function (session){
+        builder.Prompts.confirm(session, "Zal ik proberen te raden wat je bedoelt?");
+        next;
+        },
+    function (session,results) {
+        if (results.response) {session.send('Ok %(naam)s! dan gaan we dat doen!', session.userData.profile);}
+        else {session.send('Jammer %(naam)s! ik had er wel zin in', session.userData.profile);}
+    }
+        
 ]);        
 
 //Profiel bepalen
