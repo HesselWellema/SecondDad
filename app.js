@@ -27,8 +27,8 @@ server.post('/api/messages', connector.listen());
 //Intents via Luis
 
 var recognizer = new builder.LuisRecognizer('https://api.projectoxford.ai/luis/v1/application?id=0bc7c9f8-d37d-4298-a246-93e2e8a7b2ce&subscription-key=ea27b6d8709c4597b389de3cf26895f9');
-//var intents = new builder.IntentDialog({ recognizers: [recognizer] });
-var dialog = new builder.IntentDialog({ recognizers: [recognizer] });
+var intents = new builder.IntentDialog({ recognizers: [recognizer] });
+//var dialog = new builder.IntentDialog({ recognizers: [recognizer] });
 
 //=========================================================
 // Bots Dialogs
@@ -40,10 +40,10 @@ var dialog = new builder.IntentDialog({ recognizers: [recognizer] });
 
 //root dialog with Intents
 
-//bot.dialog('/',intents);
-bot.dialog('/', dialog);
+bot.dialog('/',intents);
+//bot.dialog('/', dialog);
 
-dialog.matches('echo' [
+intents.matches('echo' [
     function (session) {
         builder.Prompts.text(session, "What would you like me to say?");
     },
@@ -52,10 +52,10 @@ dialog.matches('echo' [
     }
 ]); 
 
-dialog.onDefault(
+intents.onDefault(
     [ 
     function (session) {
-        session.send('dit wilde je dus: %s',dialog);
+        session.send('dit wilde je dus: %s', bot.dialog.intents)
         session.beginDialog('/ensureProfile', session.userData.profile);
     },
     function (session,results,next) {
