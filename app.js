@@ -50,7 +50,7 @@ bot.dialog('/', [
 //Profiel bepalen
 
 bot.dialog('/ensureProfile', [
-    function (session, next) {
+    function (session, args, next) {
         if (!session.userData.profile.naam) {
             builder.Prompts.text(session, "Hoe heet je?");
         }
