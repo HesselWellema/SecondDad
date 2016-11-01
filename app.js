@@ -24,13 +24,30 @@ var connector = new builder.ChatConnector({
 var bot = new builder.UniversalBot(connector);
 server.post('/api/messages', connector.listen());
 
+//Intents via Luis
+
+var recognizer = new builder.LuisRecognizer('https://api.projectoxford.ai/luis/v1/application?id=0bc7c9f8-d37d-4298-a246-93e2e8a7b2ce&subscription-key=ea27b6d8709c4597b389de3cf26895f9');
+var intents = new builder.IntentDialog({ recognizers: [recognizer] });
+
 //=========================================================
 // Bots Dialogs
 //=========================================================
 
-//root dialog
+//root dialog with Intents
 
-bot.dialog('/', [ 
+bot.dialog('/',intents);
+
+intents.matches(/^echo/i, [
+    function (session) {
+        builder.Prompts.text(session, "What would you like me to say?");
+    },
+    function (session, results) {
+        session.send("Ok... %s", results.response);
+    }
+]); 
+
+intents.onDefault(
+    [ 
     function (session) {
         session.beginDialog('/ensureProfile', session.userData.profile);
     },
@@ -52,7 +69,7 @@ bot.dialog('/', [
             session.endDialog();}
         }
         
-]);        
+    ]);        
 
 //Profiel bepalen
 
@@ -88,11 +105,10 @@ function (session, results) {
 
 //wat gaan we doen?
 
-bot.dialog ('/guessingGame', [
+bot.dialog ('/guessingGame', intents) [
     function (session,args) {
-        session.dialogData.profile = args || {};
-        session.send('Ok we gaan beginnen %s. Je bent tenslotte al %s', session.dialogData.profile.naam, session.dialogData.profile.leeftijd);
-        session.endDialog();
+        
     }
+
 
 ])
