@@ -36,7 +36,7 @@ bot.dialog('/', [
     },
     function (session,results,next) {
         session.userData.profile = results.response;
-        session.send('Hi %(naam)s! %(leeftijd)s jaar is al heel erg oud!', session.userData.profile);
+        session.send('Hi %s! %s jaar is al heel erg oud!', session.userData.profile.naam, session.userData.profile.leeftijd);
         next();
         },
     function (session){
@@ -86,10 +86,13 @@ function (session, results) {
     }
     ]);
 
+//wat gaan we doen?
+
 bot.dialog ('/guessingGame', [
     function (session,args) {
         session.dialogData.profile = args || {};
         session.send('Ok we gaan beginnen %s. Je bent tenslotte al %s', session.dialogData.profile.naam, session.dialogData.profile.leeftijd);
+        session.endDialog();
     }
 
 ])
