@@ -43,14 +43,14 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 bot.dialog('/', intents);
 //bot.dialog('/', dialog);
 
-intents.matches((/^echo/i [
+intents.matches(/^echo/i, [
     function (session) {
         builder.Prompts.text(session, "What would you like me to say?");
     },
     function (session, results) {
         session.send("Ok... %s", results.response);
     }
-]); 
+]);
 
 intents.onDefault(
     [ 
