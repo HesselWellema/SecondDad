@@ -40,7 +40,7 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 
 //root dialog with Intents
 
-bot.dialog('/',intents);
+bot.dialog('/', intents);
 //bot.dialog('/', dialog);
 
 intents.matches('echo' [
@@ -55,7 +55,7 @@ intents.matches('echo' [
 intents.onDefault(
     [ 
     function (session) {
-        session.send('dit wilde je dus: %s', bot.dialog.intents)
+        session.send('dit wilde je dus: %s', intents.results)
         session.beginDialog('/ensureProfile', session.userData.profile);
     },
     function (session,results,next) {
