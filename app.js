@@ -34,16 +34,17 @@ bot.dialog('/', [
     function (session) {
         session.beginDialog('/ensureProfile', session.userData.profile);
     },
-    function (session,results) {
+    function (session,results,next) {
         session.userData.profile = results.response;
         session.send('Hi %(naam)s! %(leeftijd)s jaar is al heel erg oud!', session.userData.profile);
+        next();
         },
     function(session) {
         builder.Prompts.confirm(session, "Zal ik raden wat je bedoelt?");
     },
     function(session,result){
-        if (result.response) {session.send('ok %naams!'),session.userData.profile();}
-        else {session.send('dan niet %naams!'),session.userData.profile();}
+        if (result.response) {session.send('ok %naams!'),session.userData.profile;}
+        else {session.send('dan niet %naams!'),session.userData.profile;}
     }
 ]);        
 
