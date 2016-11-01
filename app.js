@@ -60,14 +60,14 @@ intents.onDefault(
         builder.Prompts.confirm(session, "Zal ik proberen te raden wat je bedoelt?");
         },
     function (session,results) {
-        if (results.response) {session.send('Ok %(naam)s! dan gaan we dat doen!', session.userData.profile);
-        
-
-        }
+        if (results.response) {
+            session.send('Ok %(naam)s! dan gaan we dat doen!', session.userData.profile)
+            session.endDialog();      
+            }
         else {
-            session.send('Jammer %(naam)s! ik had er wel zin in', session.userData.profile);
-        }
-        session.endDialog();
+            session.send('Jammer %(naam)s! ik had er wel zin in', session.userData.profile)
+            session.endDialog();
+            }
         }
         
     ]);        
