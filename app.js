@@ -23,7 +23,6 @@ var connector = new builder.ChatConnector({
 });
 var bot = new builder.UniversalBot(connector);
 server.post('/api/messages', connector.listen());
-var intents = new builder.IntentDialog();
 
 //=========================================================
 // Bots Dialogs
@@ -31,16 +30,51 @@ var intents = new builder.IntentDialog();
 
 //root dialog
 
-bot.dialog('/', intents);
-
-intents.matches(/^echo/i, [
+bot.dialog('/', [ 
     function (session) {
-        builder.Prompts.text(session, "What would you like me to say?");
+        session.beginDialog('/ensureProfile', session.userData.profile);
     },
-    function (session, results) {
-        session.send("Ok... %s", results.response);
+    function (session,results) {
+        session.userData.profile = results.response;
+        session.send('Hi %(naam)s! %(leeftijd)s jaar is al heel erg oud!', session.userData.profile);
+        },
+    function(session) {
+        builder.Prompts.confirm(session, "Zal ik raden wat je bedoelt?");
+    },
+    function(session,result){
+        if (result.response) {session.send('ok %naams!'),session.userData.profile();}
+        else {session.send('dan niet %naams!'),session.userData.profile();}
     }
-]
-)
- .onDefault(builder.DialogAction.send("I'm sorry. I didn't understand."))
-;
+]);        
+
+//Profiel bepalen
+
+bot.dialog('/ensureProfile', [
+    function (session, args, next) {
+        session.dialogData.profile = args || {};
+        if (!session.dialogData.profile.naam) {
+            builder.Prompts.text(session, "Hoe heet je?");
+        }
+        else {
+            next();
+        };
+    },     
+
+    function (session,results,next) {
+            if (results.response) {
+                session.dialogData.profile.naam = results.response;
+            };
+            
+            if (!session.dialogData.profile.leeftijd) {
+                builder.Prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"],{maxRetries: 3, retryPrompt: "Dat is geen leeftijd"});
+            }
+            else {
+                next();
+            }
+    },                  
+
+function (session, results) {
+        session.dialogData.profile.leeftijd = results.response;
+        session.endDialogWithResult({ response: session.dialogData.profile });
+    }
+    ]);
