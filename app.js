@@ -43,7 +43,7 @@ bot.dialog('/', [
         builder.Prompts.confirm(session, "Zal ik raden wat je bedoelt?");
     },
     function(session,result){
-        if (result.response) {session.send('ok %naams!'),session.userData.profile;}
+        if (result.response) {session.send('ok %(naam)s!'),session.userData.profile;}
         else {session.send('dan niet %naams!'),session.userData.profile;}
     }
 ]);        
