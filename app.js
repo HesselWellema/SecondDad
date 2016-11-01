@@ -23,6 +23,7 @@ var connector = new builder.ChatConnector({
 });
 var bot = new builder.UniversalBot(connector);
 server.post('/api/messages', connector.listen());
+var intents = new builder.IntentDialog();
 
 //=========================================================
 // Bots Dialogs
@@ -30,7 +31,11 @@ server.post('/api/messages', connector.listen());
 
 //root dialog
 
-bot.dialog('/', [ 
+bot.dialog('/', intents)
+
+.matches('^weather', builder.DialogAction.beginDialog('/weather', session.userData.profile))
+
+.onDefault( [ 
     function (session) {
         session.beginDialog('/ensureProfile', session.userData.profile);
     },
@@ -38,7 +43,32 @@ bot.dialog('/', [
         session.userData.profile = results.response;
         session.send('Hi %(naam)s! %(leeftijd)s jaar is al heel erg oud!', session.userData.profile);
         }
-]);        
+]);       
+
+// weather
+
+bot.dialog ('/weather'),[
+
+    function(session,argus,next) {
+        if (!session.dialogData.profile.naam) {
+            builder.Prompts.text(session, "En waar woon je?");
+        }
+        else {
+            next();
+        };
+    },
+    function (session,results) {
+            if (results.response) {
+                session.dialogData.profile.woonplaats = results.response;
+            };
+    },
+
+    function(session) {
+        session.send('Je woont in %(woonplaats)s!', session.dialogData.profile);
+
+    }
+
+    ]   
 
 //Profiel bepalen
 
@@ -59,7 +89,7 @@ bot.dialog('/ensureProfile', [
             };
             
             if (!session.dialogData.profile.leeftijd) {
-                builder.Prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"],{maxRetries: 3, retryPrompt: "Dat is geen leeftijd%s"});
+                builder.prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"],{maxRetries: 3, retryPrompt: "Dat is geen leeftijd"});
             }
             else {
                 next();
