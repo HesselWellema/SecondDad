@@ -61,12 +61,13 @@ intents.onDefault(
         },
     function (session,results) {
         if (results.response) {session.send('Ok %(naam)s! dan gaan we dat doen!', session.userData.profile);
-        session.beginDialog ('/guessingGame', session.userData.profile);
+        
 
         }
         else {
-            session.send('Jammer %(naam)s! ik had er wel zin in', session.userData.profile)
-            session.endDialog();}
+            session.send('Jammer %(naam)s! ik had er wel zin in', session.userData.profile);
+        }
+        session.endDialog();
         }
         
     ]);        
@@ -102,13 +103,3 @@ function (session, results) {
         session.endDialogWithResult({ response: session.dialogData.profile });
     }
     ]);
-
-//wat gaan we doen?
-
-bot.dialog ('/guessingGame', intents) [
-    function (session,args) {
-        
-    }
-
-
-])
