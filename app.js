@@ -44,7 +44,7 @@ bot.dialog('/', [
         },
     function (session,results) {
         if (results.response) {session.send('Ok %(naam)s! dan gaan we dat doen!', session.userData.profile);
-        session.beginDialog ('/guessingGame',, session.userData.profile);
+        session.beginDialog ('/guessingGame', session.userData.profile);
 
         }
         else {
