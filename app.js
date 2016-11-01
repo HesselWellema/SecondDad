@@ -58,7 +58,7 @@ bot.dialog('/', [
 
 bot.dialog('/ensureProfile', [
     function (session, args, next) {
-        session.dialogData.profile = args || {};
+        session.dialogData.profile = args;
         if (!session.dialogData.profile.naam) {
             builder.Prompts.text(session, "Hoe heet je?");
         }
@@ -88,7 +88,7 @@ function (session, results) {
 
 bot.dialog ('/guessingGame', [
     function (session,args) {
-        session.dialogData.profile = args || {};
+        session.dialogData.profile = args;
         session.send('Ok %(naam)s! we gaan beginnen', session.dialogData.profile.naam);
     }
 
