@@ -31,76 +31,13 @@ var intents = new builder.IntentDialog();
 
 //root dialog
 
-bot.dialog('/', intents)
+bot.dialog('/', intents);
 
-.matches('^weather', 
+intents.matches(/^echo/i, [
     function (session) {
-        builder.DialogAction.beginDialog('/weather', session.userData.profile)
-    }
-)
-.onDefault( [ 
-    function (session) {
-        session.beginDialog('/ensureProfile', session.userData.profile);
+        builder.Prompts.text(session, "What would you like me to say?");
     },
-    function (session,results) {
-        session.userData.profile = results.response;
-        session.send('Hi %(naam)s! %(leeftijd)s jaar is al heel erg oud!', session.userData.profile);
-        }
-]);       
-
-// weather
-
-bot.dialog ('/weather'),[
-
-    function(session,argus,next) {
-        if (!session.dialogData.profile.naam) {
-            builder.Prompts.text(session, "En waar woon je?");
-        }
-        else {
-            next();
-        };
-    },
-    function (session,results) {
-            if (results.response) {
-                session.dialogData.profile.woonplaats = results.response;
-            };
-    },
-
-    function(session) {
-        session.send('Je woont in %(woonplaats)s!', session.dialogData.profile);
-
+    function (session, results) {
+        session.send("Ok... %s", results.response);
     }
-
-    ]   
-
-//Profiel bepalen
-
-bot.dialog('/ensureProfile', [
-    function (session, args, next) {
-        session.dialogData.profile = args || {};
-        if (!session.dialogData.profile.naam) {
-            builder.Prompts.text(session, "Hoe heet je?");
-        }
-        else {
-            next();
-        };
-    },     
-
-    function (session,results,next) {
-            if (results.response) {
-                session.dialogData.profile.naam = results.response;
-            };
-            
-            if (!session.dialogData.profile.leeftijd) {
-                builder.prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"],{maxRetries: 3, retryPrompt: "Dat is geen leeftijd"});
-            }
-            else {
-                next();
-            }
-    },                  
-
-function (session, results) {
-        session.dialogData.profile.leeftijd = results.response;
-        session.endDialogWithResult({ response: session.dialogData.profile });
-    }
-    ]);
+]);
