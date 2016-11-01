@@ -35,7 +35,9 @@ bot.dialog('/', [
         session.beginDialog('/ensureProfile', session.userData.profile);
     },
     function (session,results,next) {
-        session.userData.profile = results.response;
+        if (!session.userdata.profile.leeftijd) {
+            session.userData.profile = results.response;
+        }
         session.send('Hi %(naam)s! %(leeftijd)s jaar is al heel erg oud!', session.userData.profile);
         next();
         },
