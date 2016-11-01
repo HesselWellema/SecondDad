@@ -44,7 +44,7 @@ bot.dialog('/', [
     },
     function(session,result){
         if (result.response) {session.send('ok %(naam)s!'),session.userData.profile;}
-        else {session.send('dan niet %naams!'),session.userData.profile;}
+        else {session.send('dan niet %(naam)s!'),session.userData.profile;}
     }
 ]);        
 
