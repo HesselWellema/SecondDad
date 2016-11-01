@@ -33,8 +33,11 @@ var intents = new builder.IntentDialog();
 
 bot.dialog('/', intents)
 
-.matches('^weather', builder.DialogAction.beginDialog('/weather', session.userData.profile))
-
+.matches('^weather', 
+    function (session) {
+        builder.DialogAction.beginDialog('/weather', session.userData.profile)
+    }
+)
 .onDefault( [ 
     function (session) {
         session.beginDialog('/ensureProfile', session.userData.profile);
