@@ -34,13 +34,14 @@ bot.dialog('/', [
     function (session) {
         session.beginDialog('/ensureProfile', session.userData.profile);
     },
-    function (session,results) {
+    function (session,results,next) {
         session.userData.profile = results.response;
         session.send('Hi %(naam)s! %(leeftijd)s jaar is al heel erg oud!', session.userData.profile);
+        next();
         },
-    function (session){
+    function (session,next){
         builder.Prompts.confirm(session, "Zal ik proberen te raden wat je bedoelt?");
-        next;
+        next();
         },
     function (session,results) {
         if (results.response) {session.send('Ok %(naam)s! dan gaan we dat doen!', session.userData.profile);}
@@ -68,7 +69,7 @@ bot.dialog('/ensureProfile', [
             };
             
             if (!session.dialogData.profile.leeftijd) {
-                builder.Prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"],{maxRetries: 3, retryPrompt: "Dat is geen leeftijd"});
+                builder.Prompts.text(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"],{maxRetries: 3, retryPrompt: "Dat is geen leeftijd"});
             }
             else {
                 next();
