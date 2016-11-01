@@ -40,4 +40,7 @@ intents.matches(/^echo/i, [
     function (session, results) {
         session.send("Ok... %s", results.response);
     }
-]);
+]
+)
+ .onDefault(builder.DialogAction.send("I'm sorry. I didn't understand."))
+;
