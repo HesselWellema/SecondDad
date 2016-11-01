@@ -55,6 +55,7 @@ dialog.matches('echo' [
 dialog.onDefault(
     [ 
     function (session) {
+        session.send('dit wilde je dus: %s',dialog);
         session.beginDialog('/ensureProfile', session.userData.profile);
     },
     function (session,results,next) {
