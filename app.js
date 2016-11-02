@@ -35,15 +35,14 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 //=========================================================
 
 
-
-
+//check hoe we intens.matches gebruiken: met ^echo of 'echo, En wordt Luis uberhaupt aangeroepen?'
 
 //root dialog with Intents
 
 bot.dialog('/', intents);
 //bot.dialog('/', dialog);
 
-intents.matches(/^echo/i, [
+intents.matches('echo', [
     function (session) {
         builder.Prompts.text(session, "What would you like me to say?");
     },
