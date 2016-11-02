@@ -26,7 +26,7 @@ server.post('/api/messages', connector.listen());
 
 //Intents via Luis
 
-var recognizer = new builder.LuisRecognizer('https://api.projectoxford.ai/luis/v1/application?id=0bc7c9f8-d37d-4298-a246-93e2e8a7b2ce&subscription-key=ea27b6d8709c4597b389de3cf26895f9&q=');
+var recognizer = new builder.LuisRecognizer('https://api.projectoxford.ai/luis/v1/application?id=0bc7c9f8-d37d-4298-a246-93e2e8a7b2ce&subscription-key=ea27b6d8709c4597b389de3cf26895f9');
 // try encoding query (add &A
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 //var dialog = new builder.IntentDialog({ recognizers: [recognizer] });
