@@ -20,7 +20,7 @@ server.get('/', restify.serveStatic({
 
 //weather
 
-var client = new wunderground('a4efadc225f00b52', 'Rotterdam');
+var client = new wunderground('a4efadc225f00b52', 'Rotterdam', 'ZH');
 
 // Create chat bot
 var connector = new builder.ChatConnector({
@@ -50,7 +50,7 @@ intents.matches('Echo', [
     },
     function (session, results) {
         session.send("Ok... %s", results.response);
-        client.forecast('forecast', '', function(err, data){
+        client.forecast('conditions', '', function(err, data){
         if(err) throw err;
           session.send(data);
         });
