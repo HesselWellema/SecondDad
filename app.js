@@ -1,5 +1,7 @@
 var restify = require('restify');
 var builder = require('botbuilder');
+var wunderground = require('wunderground-node');
+
 
 //=========================================================
 // Bot Setup
@@ -15,6 +17,10 @@ server.get('/', restify.serveStatic({
  directory: __dirname,
  default: '/index.html'
 }));  
+
+//weather
+
+var client = new wunderground('a4efadc225f00b52', 'Rotterdam');
 
 // Create chat bot
 var connector = new builder.ChatConnector({
@@ -44,6 +50,10 @@ intents.matches('Echo', [
     },
     function (session, results) {
         session.send("Ok... %s", results.response);
+        client.forecast('forecast', '', function(err, data){
+        if(err) throw err;
+          session.send(data);
+        });
         session.endDialog(); 
     }
 ]);
