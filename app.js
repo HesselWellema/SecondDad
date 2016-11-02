@@ -49,6 +49,7 @@ intents.matches('echo', [
     },
     function (session, results) {
         session.send("Ok... %s", results.response);
+        session.endDialog(); 
     }
 ]);
 
