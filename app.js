@@ -42,12 +42,12 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 bot.dialog('/', intents);
 //bot.dialog('/', dialog);
 
-intents.matches('echo', [
+intents.matches('Echo', intents[
     function (session) {
         session.send('dit wilde je dus: %s', intents.results);
         builder.Prompts.text(session, "What would you like me to say?");
     },
-    function (session, results) {
+    function (session, results,intents) {
         session.send("Ok... %s", results.response);
         session.endDialog(); 
     }
@@ -55,7 +55,7 @@ intents.matches('echo', [
 
 intents.onDefault(
     [ 
-    function (session) {
+    function (session,intents) {
         session.send('dit wilde je dus: %s', intents.results)
         session.beginDialog('/ensureProfile', session.userData.profile);
     },
