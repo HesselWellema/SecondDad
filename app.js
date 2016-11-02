@@ -44,6 +44,7 @@ bot.dialog('/', intents);
 
 intents.matches('echo', [
     function (session) {
+        session.send('dit wilde je dus: %s', intents.results);
         builder.Prompts.text(session, "What would you like me to say?");
     },
     function (session, results) {
