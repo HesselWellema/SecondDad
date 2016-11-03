@@ -20,7 +20,8 @@ server.get('/', restify.serveStatic({
 
 //weather
 
-var client = new wunderground('a4efadc225f00b52', 'Rotterdam', 'ZH');
+var wundergroundKey='a4efadc225f00b52';
+var wunderground = new wunderground(wundergroundKey);
 
 // Create chat bot
 var connector = new builder.ChatConnector({
@@ -50,10 +51,7 @@ intents.matches('Echo', [
     },
     function (session, results) {
         session.send("Ok... %s", results.response);
-        client.forecast('conditions', '', function(err, data){
-        if(err) throw err;
-          session.send(data);
-        });
+        console.log(results.response);
         session.endDialog(); 
     }
 ]);
@@ -66,6 +64,7 @@ intents.onDefault(
     function (session,results,next) {
         session.userData.profile = results.response;
         session.send('Hi %s! %s jaar is al heel erg oud!', session.userData.profile.naam, session.userData.profile.leeftijd);
+        weerBepalen(session.userData.profile.naam,ZH);
         next();
         },
     function (session){
@@ -102,16 +101,53 @@ bot.dialog('/ensureProfile', [
                 session.dialogData.profile.naam = results.response;
             };
             
+            if (!session.dialogData.profile.stad) {
+                builder.Prompts.text(session, "En waar woon je?",);
+            }
+            else {
+                next();
+            }
+    },
+
+    function (session,results,next) {
+            if (results.response) {
+                session.dialogData.profile.stad = results.response;
+            };
+            
             if (!session.dialogData.profile.leeftijd) {
                 builder.Prompts.number(session, ["En hoe oud ben je?", "Wat is je leeftijd?", "Hoe oud ben je al?"],{maxRetries: 3, retryPrompt: "Dat is geen leeftijd"});
             }
             else {
                 next();
             }
-    },                  
+    },
+                      
 
 function (session, results) {
         session.dialogData.profile.leeftijd = results.response;
         session.endDialogWithResult({ response: session.dialogData.profile });
     }
     ]);
+
+var weerBepalen = function (stad, staat) {
+    var url = '/api/' + wundergroundKey + '/conditions/q/staat/stad.json'
+    url = url.replace('stad', stad);
+    url = url.replace('staat', staat);
+    console.log('/.../' + staat.toUpperCase() + '/' + stad + '.json');
+    http.get(
+            {
+            host: 'api.wunderground.com',
+            path: url
+            }, 
+            function (response) {
+                var body = '';
+                response.on('data', function (d) { body += d; })
+                response.on('end', function () {
+                var data = JSON.parse(body);
+                var conditions = data.current_observation.weather;
+                session.send("'" + conditions + "' in "+ stad + " right now, and the temperature is "+ data.current_observation.temp_f + " degrees F.   "+ data.current_observation.observation_time);
+                } 
+                ) //einde response.on
+            } //einde functie response
+        ) // einde http.get
+    }; //einde functie  weer bepalen  
