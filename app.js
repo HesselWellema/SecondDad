@@ -1,6 +1,7 @@
 var restify = require('restify');
 var builder = require('botbuilder');
-var wunderground = require('wunderground-node');
+var http = require('http'); 
+var wundergroundKey = 'a4efadc225f00b52';
 
 
 //=========================================================
@@ -17,11 +18,6 @@ server.get('/', restify.serveStatic({
  directory: __dirname,
  default: '/index.html'
 }));  
-
-//weather
-
-var wundergroundKey='a4efadc225f00b52';
-var wunderground = new wunderground(wundergroundKey);
 
 // Create chat bot
 var connector = new builder.ChatConnector({
@@ -64,9 +60,38 @@ intents.onDefault(
     function (session,results,next) {
         session.userData.profile = results.response;
         session.send('Hi %s! %s jaar is al heel erg oud!', session.userData.profile.naam, session.userData.profile.leeftijd);
-        weerBepalen(session.userData.profile.naam,ZH);
         next();
         },
+//weather
+    function (session){
+        try {                                                                       //try is erg belangrijk hier
+            var city = session.userData.profile.stad.toUpperCase();                                 
+            var url = '/api/' + wundergroundKey + '/conditions/lang:NL/q/Netherlands/city.json'
+            url = url.replace('city', city);                                    //log "/.../ST/City.json" to the console for debugging 
+            console.log(url);
+
+            http.get({
+                    host: 'api.wunderground.com',
+                    path: url
+                    },  function (response) {
+                            var body = '';
+                            response.on('data', function (d) {
+                                body += d; })
+                            response.on('end', function () {
+                                var data = JSON.parse(body);
+                                var conditions = data.current_observation.weather;
+                                var temperature = data.current_observation.temp_c;
+                                //console.log("Het is nu " + conditions + " in " + session.userData.profile.stad);
+                                console.log("Het is nu " + conditions + " in " + session.userData.profile.stad + ". En de temperatuur is " + temperature + "De gevoelstemperatuur is " + feelslike_c);
+                                session.send("Het is nu " + conditions + " in " + session.userData.profile.stad + ". En de temperatuur is " + temperature + "De gevoelstemperatuur is " + feelslike_c);
+                            }); //eind response.on(end)
+                    }) // einde http.get 
+            } // einde try 
+
+        catch (e) {
+            console.log("Whoops, that didn't match! Try again."); }
+    }, //End of WeatherUnderground API function     
+
     function (session){
         builder.Prompts.confirm(session, "Zal ik proberen te raden wat je bedoelt?");
         },
@@ -102,7 +127,7 @@ bot.dialog('/ensureProfile', [
             };
             
             if (!session.dialogData.profile.stad) {
-                builder.Prompts.text(session, "En waar woon je?",);
+                builder.Prompts.text(session, "En waar woon je?");
             }
             else {
                 next();
@@ -124,30 +149,35 @@ bot.dialog('/ensureProfile', [
                       
 
 function (session, results) {
-        session.dialogData.profile.leeftijd = results.response;
+        if (results.response) {
+                session.dialogData.profile.leeftijd = results.response;
+            };
         session.endDialogWithResult({ response: session.dialogData.profile });
     }
     ]);
 
-var weerBepalen = function (stad, staat) {
-    var url = '/api/' + wundergroundKey + '/conditions/q/staat/stad.json'
-    url = url.replace('stad', stad);
-    url = url.replace('staat', staat);
-    console.log('/.../' + staat.toUpperCase() + '/' + stad + '.json');
-    http.get(
-            {
-            host: 'api.wunderground.com',
-            path: url
-            }, 
-            function (response) {
-                var body = '';
-                response.on('data', function (d) { body += d; })
-                response.on('end', function () {
-                var data = JSON.parse(body);
-                var conditions = data.current_observation.weather;
-                session.send("'" + conditions + "' in "+ stad + " right now, and the temperature is "+ data.current_observation.temp_f + " degrees F.   "+ data.current_observation.observation_time);
-                } 
-                ) //einde response.on
-            } //einde functie response
-        ) // einde http.get
-    }; //einde functie  weer bepalen  
+ var weerBepalen = function (stad){
+        try {                                                                       //try is erg belangrijk hier
+            var city = stad.toUpperCase();                                 
+            var url = '/api/' + wundergroundKey + '/conditions/lang:NL/q/Netherlands/city.json'
+            url = url.replace('city', city);                                    //log "/.../ST/City.json" to the console for debugging 
+            console.log(url);
+
+            http.get({
+                    host: 'api.wunderground.com',
+                    path: url
+                    },  function (response) {
+                            var body = '';
+                            response.on('data', function (d) {
+                                body += d; })
+                            response.on('end', function () {
+                                var data = JSON.parse(body);
+                                var conditions = data.current_observation.weather;
+                                console.log("'" + conditions + "' in " + city + " right now");
+                            }); //eind response.on(end)
+                    }) // einde http.get 
+            } // einde try 
+
+        catch (e) {
+            console.log("Whoops, that didn't match! Try again."); }
+    } //End of WeatherUnderground API function 
