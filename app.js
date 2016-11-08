@@ -1,3 +1,9 @@
+//functie maken van weer bepalen
+//aanroepen via intents
+//horoscoop?
+
+
+
 var restify = require('restify');
 var builder = require('botbuilder');
 var http = require('http'); 
@@ -29,7 +35,8 @@ server.post('/api/messages', connector.listen());
 
 //Intents via Luis
 
-var recognizer = new builder.LuisRecognizer('https://api.projectoxford.ai/luis/v1/application?id=0bc7c9f8-d37d-4298-a246-93e2e8a7b2ce&subscription-key=ea27b6d8709c4597b389de3cf26895f9');
+var recognizer = new builder.LuisRecognizer('https://api.projectoxford.ai/luis/v1/application?id=bab2367b-2314-4ab0-9e29-4ca5f78722c5&subscription-key=ea27b6d8709c4597b389de3cf26895f9');
+
 // try encoding query (add &A
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 //var dialog = new builder.IntentDialog({ recognizers: [recognizer] });
@@ -43,14 +50,26 @@ bot.dialog('/', intents);
 
 intents.matches('Echo', [
     function (session) {
-        builder.Prompts.text(session, "What would you like me to say?");
+        builder.Prompts.text(session, "Wat wil je dat ik zeg?");
     },
     function (session, results) {
         session.send("Ok... %s", results.response);
-        console.log(results.response);
-        session.endDialog(); 
+        session.endDialog(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);
     }
 ]);
+
+intents.matches('Weer', 
+    function (session,args) {
+        var city = builder.EntityRecognizer.findEntity(args.entities, 'Stad');
+        console.log("welke stad: ",city.entity)
+        if (!city) {
+            builder.Prompts.text(session, "Die stad ken ik nog niet");
+        }
+        else {
+        session.send("Je wilt het weer weten in %s", city.entity);
+        }
+        session.endDialog(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);
+    });
 
 intents.onDefault(
     [ 
@@ -59,7 +78,7 @@ intents.onDefault(
     },
     function (session,results,next) {
         session.userData.profile = results.response;
-        session.send('Hi %s! %s jaar is al heel erg oud!', session.userData.profile.naam, session.userData.profile.leeftijd);
+        session.send('Hi %s! Je bent dus %s jaar en woont in %s', session.userData.profile.naam, session.userData.profile.leeftijd, session.userData.profile.stad);
         next();
         },
 
@@ -82,16 +101,18 @@ intents.onDefault(
                                 body += d; })
                             response.on('end', function () {
                                 var data = JSON.parse(body);
-                                var conditions = data.current_observation.weather;
+                                var conditions = data.current_observation.weather.toLowerCase();
                                 var gevoelstemperatuur = data.current_observation.feelslike_c;
-                                session.send("'" + conditions + "' in " + session.userData.profile.stad + " op dit moment en een gevoelstemperatuur van " + gevoelstemperatuur + " graden Celsius");
-                                next();
+                                session.send("Het is daar " + conditions + " op dit moment en een gevoelstemperatuur van " + gevoelstemperatuur + " graden Celsius");
+                                //next();
                             }); //eind response.on(end)
                     }) // einde http.get 
             } // einde try 
 
         catch (e) {
-            console.log("Whoops, that didn't match! Try again."); }
+            console.log("Whoops, that didn't match! Try again.");
+            session.send("Ik wilde kijken wat het weer was in " + session.userData.profile.stad + ". Dat is me echter niet gelukt. Vraag me eventueel wat het weer is van een stad in de buurt")
+            }
         }, //End of WeatherUnderground API function 
 
     function (session){
@@ -116,6 +137,7 @@ bot.dialog('/ensureProfile', [
     function (session, args, next) {
         session.dialogData.profile = args || {};
         if (!session.dialogData.profile.naam) {
+            session.send("%s.", session.message.text);
             builder.Prompts.text(session, "Hoe heet je?");
         }
         else {
@@ -157,3 +179,5 @@ function (session, results) {
         session.endDialogWithResult({ response: session.dialogData.profile });
     }
     ]);
+
+    
