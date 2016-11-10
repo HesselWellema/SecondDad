@@ -167,6 +167,7 @@ bot.dialog('/weerBepalen', [
                                 body += d; })
                                 response.on('end', function () {
                                 var data = JSON.parse(body);
+                                console.log(data);
                             
                                 try {var conditions = data.current_observation.weather.toLowerCase();}
                                 catch(e) {
@@ -175,12 +176,20 @@ bot.dialog('/weerBepalen', [
                                 }
                                 var gevoelstemperatuur = data.current_observation.feelslike_c;
                                 session.send("Het is " + conditions + " in " + stad + " op dit moment en een gevoelstemperatuur van " + gevoelstemperatuur + " graden Celsius");
-                                session.send(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);                                
+                                var msg = new builder.Message(session)
+                                .attachments([{
+                                contentType: "image/gif",
+                                contentUrl: data.current_observation.icon_url
+                                }]); 
+                                session.send(msg);
+                                session.send(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);
+
+
+
                             }); //eind response.on(end)
                     }) // einde http.get 
              // einde try 
 
         session.endDialog();    
     },
-    ]);
-//einde weer bepalen
+    ]); //einde weer bepalen
