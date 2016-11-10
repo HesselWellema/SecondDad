@@ -56,80 +56,41 @@ intents.matches('Echo', [
         session.send("Ok... %s", results.response);
         session.endDialog(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);
     }
-]);
+]); //Echo
 
 intents.matches('Weer', 
     function (session,args) {
-        var city = builder.EntityRecognizer.findEntity(args.entities, 'Stad');
-        console.log("welke stad: ",city.entity)
-        if (!city) {
-            builder.Prompts.text(session, "Die stad ken ik nog niet");
-        }
-        else {
-        session.send("Je wilt het weer weten in %s", city.entity);
-        }
+        try {
+            var city = builder.EntityRecognizer.findEntity(args.entities, 'Stad');
+            session.beginDialog('/weerBepalen', city.entity);
+            }
+        catch (e) {
+            builder.Prompts.text(session, "Die stad ken ik nog niet. Probeer een stad in de buurt.");
+            }        
+    }); //weer
+
+intents.matches('Help', [
+    function (session) {
+        session.send ("Ik kan niet zoveel. Vraag me het weer via 'Weer' of het weer in een bepaalde stad. Met Echo praat ik je na")
+    },
+    function (session, results) {
         session.endDialog(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);
-    });
+    }
+]); //Echo
 
 intents.onDefault(
     [ 
     function (session) {
-        session.beginDialog('/ensureProfile', session.userData.profile);
+        if (!session.userData.profile) {session.beginDialog('/ensureProfile', session.userData.profile);}
     },
-    function (session,results,next) {
-        session.userData.profile = results.response;
-        session.send('Hi %s! Je bent dus %s jaar en woont in %s', session.userData.profile.naam, session.userData.profile.leeftijd, session.userData.profile.stad);
-        next();
-        },
 
-    function (session,next){ // huidige weer
-        try {                                                                       //try is erg belangrijk hier
-            var city = session.userData.profile.stad.toUpperCase();                                 
-            var url = '/api/' + wundergroundKey + '/conditions/lang:NL/q/Netherlands/city.json'
-            url = url.replace('city', city);                                    //log "/.../ST/City.json" to the console for debugging 
-            console.log(url);
-
-            http.get({
-                    host: 'api.wunderground.com',
-                    path: url
-                    },  function (response,next) {
-                            var body = '';
-                            response.on('uncaughtException', function (err) {
-                                console.log(err);
-                            }); 
-                            response.on('data', function (d) {
-                                body += d; })
-                            response.on('end', function () {
-                                var data = JSON.parse(body);
-                                var conditions = data.current_observation.weather.toLowerCase();
-                                var gevoelstemperatuur = data.current_observation.feelslike_c;
-                                session.send("Het is daar " + conditions + " op dit moment en een gevoelstemperatuur van " + gevoelstemperatuur + " graden Celsius");
-                                //next();
-                            }); //eind response.on(end)
-                    }) // einde http.get 
-            } // einde try 
-
-        catch (e) {
-            console.log("Whoops, that didn't match! Try again.");
-            session.send("Ik wilde kijken wat het weer was in " + session.userData.profile.stad + ". Dat is me echter niet gelukt. Vraag me eventueel wat het weer is van een stad in de buurt")
-            }
-        }, //End of WeatherUnderground API function 
-
-    function (session){
-        builder.Prompts.confirm(session, "Zal ik proberen te raden wat je bedoelt?");
-        },
     function (session,results) {
-        if (results.response) {
-            session.send('Ok %(naam)s! dan gaan we dat doen!', session.userData.profile)
-            session.endDialog();      
-            }
-        else {
-            session.send('Jammer %(naam)s! ik had er wel zin in', session.userData.profile)
-            session.endDialog();
-            }
-        }
-        
-    ]);        
+        session.userData.profile = results.response;
+        console.log(session.userData.profile);
+        session.beginDialog('/weerBepalen', session.userData.profile.stad);
+        } 
+
+    ])
 
 //Profiel bepalen
 
@@ -172,12 +133,54 @@ bot.dialog('/ensureProfile', [
     },
                       
 
-function (session, results) {
+function (session,results,next) {
         if (results.response) {
                 session.dialogData.profile.leeftijd = results.response;
             };
-        session.endDialogWithResult({ response: session.dialogData.profile });
-    }
-    ]);
+        next();    
+    },
 
-    
+function (session,next){ 
+        session.send('Hi %s! Je bent dus %s jaar en woont in %s', session.dialogData.profile.naam, session.dialogData.profile.leeftijd, session.dialogData.profile.stad);   
+        session.send("Type Help als je wilt weten wat ik allemaal kan");
+        //session.send(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);  
+        session.endDialogWithResult({ response: session.dialogData.profile });
+        }, 
+    ]),
+
+bot.dialog('/weerBepalen', [
+    function (session, stad, next) {
+                                                                               //try is erg belangrijk hier
+            var city = stad.toUpperCase();                                 
+            var url = '/api/' + wundergroundKey + '/conditions/lang:NL/q/Netherlands/city.json'
+            url = url.replace('city', city);                                    //log "/.../ST/City.json" to the console for debugging 
+            console.log(url);
+            http.get({
+                    host: 'api.wunderground.com',
+                    path: url
+                    },  function (response,next) {
+                            var body = '';
+                            response.on('uncaughtException', function (err) {
+                                console.log(err);
+                            }); 
+                            response.on('data', function (d) {
+                                body += d; })
+                                response.on('end', function () {
+                                var data = JSON.parse(body);
+                            
+                                try {var conditions = data.current_observation.weather.toLowerCase();}
+                                catch(e) {
+                                    session.send("ik probeerde het weer in %s te bepalen maar dat ging niet goed. Probeer een andere plaats (in de buurt)",stad);
+                                    console.log(body)
+                                }
+                                var gevoelstemperatuur = data.current_observation.feelslike_c;
+                                session.send("Het is " + conditions + " in " + stad + " op dit moment en een gevoelstemperatuur van " + gevoelstemperatuur + " graden Celsius");
+                                session.send(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);                                
+                            }); //eind response.on(end)
+                    }) // einde http.get 
+             // einde try 
+
+        session.endDialog();    
+    },
+    ]);
+//einde weer bepalen
