@@ -176,15 +176,22 @@ bot.dialog('/weerBepalen', [
                                 }
                                 var gevoelstemperatuur = data.current_observation.feelslike_c;
                                 session.send("Het is " + conditions + " in " + stad + " op dit moment en een gevoelstemperatuur van " + gevoelstemperatuur + " graden Celsius");
+                                
+                                
                                 var msg = new builder.Message(session)
-                                .attachments([{
-                                contentType: "image/gif",
-                                contentUrl: data.current_observation.icon_url
-                                }]); 
+                                .textFormat(builder.TextFormat.xml)
+                                .attachments([
+                                new builder.HeroCard(session)
+                                .title(stad)
+                                .subtitle("Het weer op dit moment")
+                                .text(conditions + " in " + stad + " op dit moment en een gevoelstemperatuur van " + gevoelstemperatuur + " graden Celsius. Tab voor de weersvoorspelling in " + stad)
+                                .images([
+                                builder.CardImage.create(session, data.current_observation.icon_url)
+                                ])
+                                .tap(builder.CardAction.openUrl(session, data.current_observation.forecast_url))
+                                ]);
                                 session.send(msg);
                                 session.send(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);
-
-
 
                             }); //eind response.on(end)
                     }) // einde http.get 
