@@ -87,17 +87,22 @@ intents.matches('Help', [
 ]); //Echo
 
 
-intents.matches('/DeleteProfile', 
-    (function (session, next) {
-    console.log("delete profile")
-    if (builder.Prompts.confirm(session, "Weet je zeker dat je je hele chathistorie wilt verwijderen?")) {
-    session.perUserInConversationData = {};
-    session.userData = {};
-    session.conversationData = {};
-    session.userData.firstRun = true;
+intents.matches('Cancel', [
+    function (session, next) {
+        builder.Prompts.confirm(session, "Weet je zeker dat je je hele chathistorie wilt verwijderen?");   
+    },
+
+    function(session, results) {
+        if (results.response) {
+             session.userData = {}
+             session.conversationData = {};
+             session.userData.firstRun = true;
+             session.send("Uw hele historie is verwijderd");
+             session.endDialog(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);
+
+        }
     }
-  })
-)   
+])  
 
 intents.onDefault(
     [ 
@@ -109,6 +114,7 @@ intents.onDefault(
         session.userData.profile = results.response;
         console.log(session.userData.profile);
         session.beginDialog('/weerBepalen', session.userData.profile.stad);
+
         } 
 
     ])
@@ -163,7 +169,6 @@ function (session,results,next) {
 
 function (session,next){ 
         session.send('Hi %s! Je bent dus %s jaar en woont in %s', session.dialogData.profile.naam, session.dialogData.profile.leeftijd, session.dialogData.profile.stad);   
-        session.send("Type Help als je wilt weten wat ik allemaal kan");
         //session.send(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);  
         session.endDialogWithResult({ response: session.dialogData.profile });
         }, 
@@ -192,15 +197,13 @@ bot.dialog('/weerBepalen', [
                                 catch(e) {
                                     session.send("ik probeerde het weer in %s te bepalen maar dat ging niet goed. Probeer een andere plaats (in de buurt)",stad);
                                     console.log(body)
-                                }
-                                var gevoelstemperatuur = data.current_observation.feelslike_c;
-                                                               
+                                }                                                              
                                 var msg = new builder.Message(session)
                                 .textFormat(builder.TextFormat.xml)
                                 .attachments([
                                 new builder.HeroCard(session)
                                 .title(stad)
-                                .text(capitalize(conditions) + " in " + stad + " op dit moment en een gevoelstemperatuur van " + gevoelstemperatuur + " graden Celsius. Tab voor de weersvoorspelling in " + stad)
+                                .text(capitalize(conditions) + " in " + stad + " op dit moment en een gevoelstemperatuur van " + data.current_observation.feelslike_c + " graden Celsius. De luchtvochtigheid is " + data.current_observation.relative_humidity + " en de wind komt uit " + data.current_observation.wind_dir + " met " + data.current_observation.wind_kph + " km/u")
                                 .images([
                                 builder.CardImage.create(session, data.current_observation.icon_url)
                                 ])
