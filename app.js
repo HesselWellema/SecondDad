@@ -86,6 +86,19 @@ intents.matches('Help', [
     }
 ]); //Echo
 
+
+intents.matches('/DeleteProfile', 
+    (function (session, next) {
+    console.log("delete profile")
+    if (builder.Prompts.confirm(session, "Weet je zeker dat je je hele chathistorie wilt verwijderen?")) {
+    session.perUserInConversationData = {};
+    session.userData = {};
+    session.conversationData = {};
+    session.userData.firstRun = true;
+    }
+  })
+)   
+
 intents.onDefault(
     [ 
     function (session) {
@@ -201,5 +214,5 @@ bot.dialog('/weerBepalen', [
              // einde try 
 
         session.endDialog();    
-    },
-    ]); //einde weer bepalen
+     },
+   ]); //einde weer bepalen
