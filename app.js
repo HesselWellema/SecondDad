@@ -2,7 +2,13 @@
 //aanroepen via intents
 //horoscoop?
 
+//Some functions
 
+function capitalize(s) {
+    return s && s[0].toUpperCase() + s.slice(1);
+    }
+
+//bot building
 
 var restify = require('restify');
 var builder = require('botbuilder');
@@ -62,7 +68,9 @@ intents.matches('Weer',
     function (session,args) {
         try {
             var city = builder.EntityRecognizer.findEntity(args.entities, 'Stad');
-            session.beginDialog('/weerBepalen', city.entity);
+            var stad = capitalize(city.entity);
+            console.log(stad);
+            session.beginDialog('/weerBepalen', stad);
             }
         catch (e) {
             builder.Prompts.text(session, "Die stad ken ik nog niet. Probeer een stad in de buurt.");
@@ -166,25 +174,20 @@ bot.dialog('/weerBepalen', [
                             response.on('data', function (d) {
                                 body += d; })
                                 response.on('end', function () {
-                                var data = JSON.parse(body);
-                                console.log(data);
-                            
+                                var data = JSON.parse(body);                          
                                 try {var conditions = data.current_observation.weather.toLowerCase();}
                                 catch(e) {
                                     session.send("ik probeerde het weer in %s te bepalen maar dat ging niet goed. Probeer een andere plaats (in de buurt)",stad);
                                     console.log(body)
                                 }
                                 var gevoelstemperatuur = data.current_observation.feelslike_c;
-                                session.send("Het is " + conditions + " in " + stad + " op dit moment en een gevoelstemperatuur van " + gevoelstemperatuur + " graden Celsius");
-                                
-                                
+                                                               
                                 var msg = new builder.Message(session)
                                 .textFormat(builder.TextFormat.xml)
                                 .attachments([
                                 new builder.HeroCard(session)
                                 .title(stad)
-                                .subtitle("Het weer op dit moment")
-                                .text(conditions + " in " + stad + " op dit moment en een gevoelstemperatuur van " + gevoelstemperatuur + " graden Celsius. Tab voor de weersvoorspelling in " + stad)
+                                .text(capitalize(conditions) + " in " + stad + " op dit moment en een gevoelstemperatuur van " + gevoelstemperatuur + " graden Celsius. Tab voor de weersvoorspelling in " + stad)
                                 .images([
                                 builder.CardImage.create(session, data.current_observation.icon_url)
                                 ])
