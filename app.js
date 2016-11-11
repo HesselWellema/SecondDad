@@ -1,5 +1,4 @@
-//functie maken van weer bepalen
-//aanroepen via intents
+//try catch aanpassen huidige weer
 //horoscoop?
 
 //Some functions
@@ -14,6 +13,10 @@ var restify = require('restify');
 var builder = require('botbuilder');
 var http = require('http'); 
 var wundergroundKey = 'a4efadc225f00b52';
+
+//localisatie
+
+var keuzes = ["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"];
 
 
 //=========================================================
@@ -77,12 +80,26 @@ intents.matches('Weer',
             }        
     }); //weer
 
+
+intents.matches('weerVoorspellen', 
+    function (session,args) {
+        try {
+            var city = builder.EntityRecognizer.findEntity(args.entities, 'Stad');
+            var stad = capitalize(city.entity);
+            console.log(stad);
+            session.beginDialog('/weerVoorspellen', stad);
+            }
+        catch (e) {
+            builder.Prompts.text(session, "Die stad ken ik nog niet. Probeer een stad in de buurt.");
+            }        
+    }); //weer
+
 intents.matches('Help', [
     function (session) {
         session.send ("Ik kan niet zoveel. Vraag me het weer via 'Weer' of het weer in een bepaalde stad. Met Echo praat ik je na")
     },
     function (session, results) {
-        session.endDialog(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);
+        session.endDialog(keuzes);
     }
 ]); //Echo
 
@@ -98,7 +115,7 @@ intents.matches('Cancel', [
              session.conversationData = {};
              session.userData.firstRun = true;
              session.send("Uw hele historie is verwijderd");
-             session.endDialog(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);
+             session.endDialog(keuzes);
 
         }
     }
@@ -196,6 +213,7 @@ bot.dialog('/weerBepalen', [
                                 try {var conditions = data.current_observation.weather.toLowerCase();}
                                 catch(e) {
                                     session.send("ik probeerde het weer in %s te bepalen maar dat ging niet goed. Probeer een andere plaats (in de buurt)",stad);
+                                    session.send(keuzes);
                                     console.log(body)
                                 }                                                              
                                 var msg = new builder.Message(session)
@@ -210,11 +228,66 @@ bot.dialog('/weerBepalen', [
                                 .tap(builder.CardAction.openUrl(session, data.current_observation.forecast_url))
                                 ]);
                                 session.send(msg);
-                                session.send(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);
+                                session.send(keuzes);
 
                             }); //eind response.on(end)
                     }) // einde http.get 
              // einde try 
+
+        session.endDialog();    
+     },
+   ]); //einde weer bepalen
+
+   
+   bot.dialog('/weerVoorspellen', [
+    function (session, stad, next) {
+                                                                               //try is erg belangrijk hier
+            var city = stad.toUpperCase();                                 
+            var url = '/api/' + wundergroundKey + '/forecast/lang:NL/q/Netherlands/city.json'
+            url = url.replace('city', city);                                    //log "/.../ST/City.json" to the console for debugging 
+            console.log(url);
+            http.get({
+                    host: 'api.wunderground.com',
+                    path: url
+                    },  function (response,next) {
+                            var body = '';
+                            response.on('uncaughtException', function (err) {
+                                console.log(err);
+                            }); 
+                            response.on('data', function (d) {
+                                body += d; })
+                                response.on('end', function () {
+                                var data = JSON.parse(body);     
+                                console.log ("Alle data  in body: " + data)                     
+                               
+                                try {                                                        
+                                    console.log("we gaan een kaart bouwen")
+                                    var voorspelling = data.forecast.txt_forecast.forecastday;
+                                    var msg = new builder.Message(session)
+                                    .textFormat(builder.TextFormat.xml)
+                                    .attachments([
+                                    new builder.HeroCard(session)
+                                    .title(stad)
+                                    .text(capitalize(voorspelling[1].title) + " is de verwachting " + voorspelling[1].fcttext_metric + " " + capitalize(voorspelling[2].title) + " is de verwachting " + voorspelling[2].fcttext_metric)
+                                    //.images([
+                                   // builder.CardImage.create(session, data.forecast.txt_forecast.forecastday[1].icon_url)
+                                   // ])
+                                   // .tap(builder.CardAction.openUrl(session, data.forecast.txt_forecast.forecastday[1].icon_url))
+                                    ]);
+                                    session.send(msg);
+                                    session.send(keuzes);
+                                    } // einde try
+
+                                  catch(e) {
+                                    session.send("ik probeerde het weer te voorspellen in %s maar dat ging niet goed. Probeer een andere plaats (in de buurt)",stad);
+                                    session.send(keuzes);
+                                    console.log(body);
+                                    
+                                }  // einde catch  
+
+                            }); //eind response.on(end)
+                    }) // einde http.get 
+        
 
         session.endDialog();    
      },
