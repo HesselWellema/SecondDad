@@ -211,26 +211,25 @@ bot.dialog('/weerBepalen', [
                                 body += d; })
                                 response.on('end', function () {
                                 var data = JSON.parse(body);                          
-                                try {var conditions = data.current_observation.weather.toLowerCase();}
+                                try {
+                                    var conditions = data.current_observation;
+                                    var msg = new builder.Message(session)
+                                    .textFormat(builder.TextFormat.xml)
+                                    .attachments([
+                                    new builder.HeroCard(session)
+                                    .title(stad)
+                                    .text(capitalize(conditions.weather) + " in " + stad + " op dit moment en een gevoelstemperatuur van " + conditions.feelslike_c + " graden Celsius. De luchtvochtigheid is " + conditions.relative_humidity + " en de wind komt uit " + conditions.wind_dir + " met " + conditions.wind_kph + " km/u")
+                                    .images([builder.CardImage.create(session, conditions.icon_url)])
+                                    .tap(builder.CardAction.openUrl(session, conditions.forecast_url))
+                                     ]);
+                                    session.send(msg);
+                                    session.send(keuzes);
+                                     } //einde try
                                 catch(e) {
                                     session.send("ik probeerde het weer in %s te bepalen maar dat ging niet goed. Probeer een andere plaats (in de buurt)",stad);
                                     session.send(keuzes);
                                     console.log(body)
-                                }                                                              
-                                var msg = new builder.Message(session)
-                                .textFormat(builder.TextFormat.xml)
-                                .attachments([
-                                new builder.HeroCard(session)
-                                .title(stad)
-                                .text(capitalize(conditions) + " in " + stad + " op dit moment en een gevoelstemperatuur van " + data.current_observation.feelslike_c + " graden Celsius. De luchtvochtigheid is " + data.current_observation.relative_humidity + " en de wind komt uit " + data.current_observation.wind_dir + " met " + data.current_observation.wind_kph + " km/u")
-                                .images([
-                                builder.CardImage.create(session, data.current_observation.icon_url)
-                                ])
-                                .tap(builder.CardAction.openUrl(session, data.current_observation.forecast_url))
-                                ]);
-                                session.send(msg);
-                                session.send(keuzes);
-
+                                    }    
                             }); //eind response.on(end)
                     }) // einde http.get 
              // einde try 
@@ -261,8 +260,8 @@ bot.dialog('/weerBepalen', [
                                 var data = JSON.parse(body);                       
                                 try {                                                        
                                     var voorspelling = data.forecast.txt_forecast.forecastday;
-                                    session.send (voorspelling[1].title + ". " + voorspelling[1].fcttext_metric);
-                                    session.send (voorspelling[2].title + ". " + voorspelling[2].fcttext_metric);
+                                    session.send (capitalize(voorspelling[1].title) + ". " + voorspelling[1].fcttext_metric);
+                                    session.send (capitalize(voorspelling[2].title) + ". " + voorspelling[2].fcttext_metric);
                                     session.send(keuzes);
                                     } // einde try
 
