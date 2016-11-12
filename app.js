@@ -1,5 +1,6 @@
 //try catch aanpassen huidige weer
 //horoscoop?
+// koppeling met Watson
 
 //Some functions
 
@@ -63,7 +64,7 @@ intents.matches('Echo', [
     },
     function (session, results) {
         session.send("Ok... %s", results.response);
-        session.endDialog(["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"]);
+        session.endDialog(keuzes);
     }
 ]); //Echo
 
@@ -257,31 +258,17 @@ bot.dialog('/weerBepalen', [
                             response.on('data', function (d) {
                                 body += d; })
                                 response.on('end', function () {
-                                var data = JSON.parse(body);     
-                                console.log ("Alle data  in body: " + data)                     
-                               
+                                var data = JSON.parse(body);                       
                                 try {                                                        
-                                    console.log("we gaan een kaart bouwen")
                                     var voorspelling = data.forecast.txt_forecast.forecastday;
-                                    var msg = new builder.Message(session)
-                                    .textFormat(builder.TextFormat.xml)
-                                    .attachments([
-                                    new builder.HeroCard(session)
-                                    .title(stad)
-                                    .text(capitalize(voorspelling[1].title) + " is de verwachting " + voorspelling[1].fcttext_metric + " " + capitalize(voorspelling[2].title) + " is de verwachting " + voorspelling[2].fcttext_metric)
-                                    //.images([
-                                   // builder.CardImage.create(session, data.forecast.txt_forecast.forecastday[1].icon_url)
-                                   // ])
-                                   // .tap(builder.CardAction.openUrl(session, data.forecast.txt_forecast.forecastday[1].icon_url))
-                                    ]);
-                                    session.send(msg);
+                                    session.send (voorspelling[1].title + ". " + voorspelling[1].fcttext_metric);
+                                    session.send (voorspelling[2].title + ". " + voorspelling[2].fcttext_metric);
                                     session.send(keuzes);
                                     } // einde try
 
                                   catch(e) {
                                     session.send("ik probeerde het weer te voorspellen in %s maar dat ging niet goed. Probeer een andere plaats (in de buurt)",stad);
                                     session.send(keuzes);
-                                    console.log(body);
                                     
                                 }  // einde catch  
 
