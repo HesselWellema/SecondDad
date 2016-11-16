@@ -55,12 +55,12 @@ server.get('/', restify.serveStatic({
 
 //create twitter client
 
-//var twitterClient = new Twitter({
-// consumer_key: env.consumer_key,
-//  consumer_secret: env.consumer_secret,
-//  access_token_key: env.access_token_key,
-//  access_token_secret: env.access_token_secret
-//  });
+var twitterClient = new Twitter({
+    consumer_key: env.consumer_key,
+    consumer_secret: env.consumer_secret,
+    access_token_key: env.access_token_key,
+    access_token_secret: env.access_token_secret
+});
 
 // Create chat bot
 var connector = new builder.ChatConnector({
