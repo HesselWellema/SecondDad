@@ -17,10 +17,10 @@ var Twitter = require('twitter');
 //var env = require('dotenv').config();
 
 //process envelops
-var wundergroundKey = process.env.WUNDERGROUND_KEY;
-console.log ("wundergroundkey: " + wundergroundKey);
-var luisKey = process.env.LUIS_KEY;
-console.log("luisKey: " + luisKey)
+//var wundergroundKey = process.env.WUNDERGROUND_KEY;
+//console.log ("wundergroundkey: " + wundergroundKey);
+//var luisKey = process.env.LUIS_KEY;
+//console.log("luisKey: " + luisKey)
 
 
 //localisatie
