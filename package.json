@@ -23,9 +23,11 @@
   "homepage": "https://github.com/HesselWellema/SecondDad#readme",
   "dependencies": {
     "botbuilder": "^3.3.3",
+    "dotenv": "^2.0.0",
     "http": "0.0.0",
     "https": "^1.0.0",
     "restify": "^4.1.1",
+    "twitter": "^1.4.0",
     "wunderground": "0.0.0"
   }
 }
