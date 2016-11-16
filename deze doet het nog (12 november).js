@@ -1,4 +1,6 @@
-//Internal server error fixen
+//try catch aanpassen huidige weer
+//horoscoop?
+// koppeling met Watson
 
 //Some functions
 
@@ -6,22 +8,12 @@ function capitalize(s) {
     return s && s[0].toUpperCase() + s.slice(1);
     }
 
-//global vars
-
-//modules
+//bot building
 
 var restify = require('restify');
 var builder = require('botbuilder');
 var http = require('http'); 
-var Twitter = require('twitter');
-var env = require('dotenv').config();
-
-//process envelops
-var wundergroundKey = process.env.WUNDERGROUND_KEY;
-console.log ("wundergroundkey: " + wundergroundKey);
-var luisKey = process.env.LUIS_KEY;
-console.log("luisKey: " + luisKey)
-
+var wundergroundKey = 'a4efadc225f00b52';
 
 //localisatie
 
@@ -41,26 +33,7 @@ server.listen(process.env.port || process.env.PORT || 3978, function () {
 server.get('/', restify.serveStatic({
  directory: __dirname,
  default: '/index.html'
-}));
-
-
-// Watson Setup
-var PersonalityInsightsV3 = require('watson-developer-cloud/personality-insights/v3');
-
-var personality_insights = new PersonalityInsightsV3({
-  username: process.env.WATSON_USERNAME,
-  password: process.env.WATSON_PASSWORD,
-  version_date: '2016-10-19'
-});
-
-//create twitter client
-
-var twitterClient = new Twitter({
- consumer_key: env.consumer_key,
-  consumer_secret: env.consumer_secret,
-  access_token_key: env.access_token_key,
-  access_token_secret: env.access_token_secret
-  });
+}));  
 
 // Create chat bot
 var connector = new builder.ChatConnector({
@@ -72,9 +45,7 @@ server.post('/api/messages', connector.listen());
 
 //Intents via Luis
 
-var url = 'https://api.projectoxford.ai/luis/v1/application?id=bab2367b-2314-4ab0-9e29-4ca5f78722c5&subscription-key=' + luisKey;
-console.log (url);
-var recognizer = new builder.LuisRecognizer(url);
+var recognizer = new builder.LuisRecognizer('https://api.projectoxford.ai/luis/v1/application?id=bab2367b-2314-4ab0-9e29-4ca5f78722c5&subscription-key=ea27b6d8709c4597b389de3cf26895f9');
 
 // try encoding query (add &A
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
@@ -120,7 +91,7 @@ intents.matches('weerVoorspellen',
             session.beginDialog('/weerVoorspellen', stad);
             }
         catch (e) {
-            session.send("Die stad ken ik nog niet. Probeer een stad in de buurt.");
+            builder.Prompts.text(session, "Die stad ken ik nog niet. Probeer een stad in de buurt.");
             }        
     }); //weer
 
@@ -131,39 +102,8 @@ intents.matches('Help', [
     function (session, results) {
         session.endDialog(keuzes);
     }
-]); //help
+]); //Echo
 
-
-intents.matches('Tweets', 
-    function (session,args) {
-            var name = builder.EntityRecognizer.findEntity(args.entities, 'TwitterNaam');
-            try {
-                if (name.entity) {
-                    session.beginDialog('/twitter', name.entity);
-                    }
-                else {
-                    session.send("Van die naam kan ik geen tweets vinden. Check ajb de spelling (gebruik geen @ voor de naam).");
-                    }
-            }
-            catch(e) {
-                console.log ("geen Twitternaam gevonden")
-            }
-        
-    }); //Tweets
-
-intents.matches('Analyse', 
-    function (session,args) {
-            var name = builder.EntityRecognizer.findEntity(args.entities, 'TwitterNaam');
-            var twitterNaam = name.entity;
-            if (twitterNaam) {
-                session.beginDialog('/Analyse', twitterNaam);
-            }
-            
-            else {
-            session.send("Van die naam kan ik geen tweets vinden. Check ajb de spelling (gebruik geen @ voor de naam).");
-            }
-        
-    }); //Analyse
 
 intents.matches('Cancel', [
     function (session, next) {
@@ -271,27 +211,29 @@ bot.dialog('/weerBepalen', [
                                 body += d; })
                                 response.on('end', function () {
                                 var data = JSON.parse(body);                          
-                                try {
-                                    var conditions = data.current_observation;
-                                    var msg = new builder.Message(session)
-                                    .textFormat(builder.TextFormat.xml)
-                                    .attachments([
-                                    new builder.HeroCard(session)
-                                    .title(stad)
-                                    .text(capitalize(conditions.weather) + " in " + stad + " op dit moment en een gevoelstemperatuur van " + conditions.feelslike_c + " graden Celsius. De luchtvochtigheid is " + conditions.relative_humidity + " en de wind komt uit " + conditions.wind_dir + " met " + conditions.wind_kph + " km/u")
-                                    .images([builder.CardImage.create(session, conditions.icon_url)])
-                                    .tap(builder.CardAction.openUrl(session, conditions.forecast_url))
-                                     ]);
-                                    session.send(msg);
-                                    session.send(keuzes);
-                                     } //einde try
+                                try {var conditions = data.current_observation.weather.toLowerCase();}
                                 catch(e) {
                                     session.send("ik probeerde het weer in %s te bepalen maar dat ging niet goed. Probeer een andere plaats (in de buurt)",stad);
                                     session.send(keuzes);
                                     console.log(body)
-                                    }    
+                                }                                                              
+                                var msg = new builder.Message(session)
+                                .textFormat(builder.TextFormat.xml)
+                                .attachments([
+                                new builder.HeroCard(session)
+                                .title(stad)
+                                .text(capitalize(conditions) + " in " + stad + " op dit moment en een gevoelstemperatuur van " + data.current_observation.feelslike_c + " graden Celsius. De luchtvochtigheid is " + data.current_observation.relative_humidity + " en de wind komt uit " + data.current_observation.wind_dir + " met " + data.current_observation.wind_kph + " km/u")
+                                .images([
+                                builder.CardImage.create(session, data.current_observation.icon_url)
+                                ])
+                                .tap(builder.CardAction.openUrl(session, data.current_observation.forecast_url))
+                                ]);
+                                session.send(msg);
+                                session.send(keuzes);
+
                             }); //eind response.on(end)
                     }) // einde http.get 
+             // einde try 
 
         session.endDialog();    
      },
@@ -319,8 +261,8 @@ bot.dialog('/weerBepalen', [
                                 var data = JSON.parse(body);                       
                                 try {                                                        
                                     var voorspelling = data.forecast.txt_forecast.forecastday;
-                                    session.send (capitalize(voorspelling[1].title) + ". " + voorspelling[1].fcttext_metric);
-                                    session.send (capitalize(voorspelling[2].title) + ". " + voorspelling[2].fcttext_metric);
+                                    session.send (voorspelling[1].title + ". " + voorspelling[1].fcttext_metric);
+                                    session.send (voorspelling[2].title + ". " + voorspelling[2].fcttext_metric);
                                     session.send(keuzes);
                                     } // einde try
 
@@ -337,71 +279,3 @@ bot.dialog('/weerBepalen', [
         session.endDialog();    
      },
    ]); //einde weer bepalen
-
-
-
-//twitter
-bot.dialog('/twitter', [
-    function (session, twitterName) {
-        var params = {screen_name: twitterName, count: 3};
-        console.log("voor wie: " + twitterName);
-
-        twitterClient.get('statuses/user_timeline', params, function(error, tweets, response) {
-            if (!error) {
-                for (var i = 0; i <3; i++) { 
-                    try {
-                        session.send ("nr " + (i+1) + " van de laatste 3 tweets: "  + tweets[i].text)
-                    }
-                    catch(e) {
-                        break;
-                    }
-                }
-            }
-       
-       session.endDialog();  
-    })
-}]) //einde twitter
-
-
-bot.dialog('/Analyse', [
-    function (session, naam) {
-        var aantal = 1000
-        var params = {screen_name: naam, count: aantal};
-        var tekst = "";
-        console.log("voor wie: " + naam);
-
-        twitterClient.get('statuses/user_timeline', params, function(error, tweets, response) {
-            if (!error) {
-                for (var i = 0; i < aantal-1; i++) { 
-                    try {
-                        tekst = tekst + tweets[i].text;
-                    }
-                    catch(e) {
-                        break;
-                    }
-                }
-            } 
-            console.log ("aantal tweets verwerkt: " + i);
-            aantal = i;
-       
-       personality_insights.profile({
-            text: tekst,
-            consumption_preferences: false
-            },
-            
-        function (err, response) {
-            if (err) 
-                  console.log('error:', err);
-            else {
-                //var data = JSON.stringify(response, null, 2);
-                session.send ("profiel van " + naam + " gebaseerd op " + aantal + "tweets: ")
-                session.send("Openness:          "+ Math.round(response.personality[0].percentile*100) + " %");
-                session.send("Conscientiousness  "+ Math.round(response.personality[1].percentile*100) + " %");
-                session.send("Extraversion       "+ Math.round(response.personality[2].percentile*100) + " %");
-                session.send("Agreeableness      "+ Math.round(response.personality[3].percentile*100) + " %");
-                session.send("Emotional range    "+ Math.round(response.personality[4].percentile*100) + " %");
-                }
-            });  
-        session.endDialog();  
-    })
-}]) //einde psycho
