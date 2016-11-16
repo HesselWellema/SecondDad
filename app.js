@@ -45,13 +45,13 @@ server.get('/', restify.serveStatic({
 
 
 // Watson Setup
-var PersonalityInsightsV3 = require('watson-developer-cloud/personality-insights/v3');
+//var PersonalityInsightsV3 = require('watson-developer-cloud/personality-insights/v3');
 
-var personality_insights = new PersonalityInsightsV3({
-  username: process.env.WATSON_USERNAME,
-  password: process.env.WATSON_PASSWORD,
-  version_date: '2016-10-19'
-});
+//var personality_insights = new PersonalityInsightsV3({
+//  username: process.env.WATSON_USERNAME,
+//  password: process.env.WATSON_PASSWORD,
+//  version_date: '2016-10-19'
+//});
 
 //create twitter client
 
