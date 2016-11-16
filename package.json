@@ -28,6 +28,7 @@
     "https": "^1.0.0",
     "restify": "^4.1.1",
     "twitter": "^1.4.0",
+    "watson-developer-cloud": "^2.9.0",
     "wunderground": "0.0.0"
   }
 }
