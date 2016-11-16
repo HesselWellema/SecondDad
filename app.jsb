@@ -1,7 +1,4 @@
-// koppeling met Watson
-// twitter afmaken
-// alles naar .env repareren
-
+//Internal server error fixen
 
 //Some functions
 
@@ -20,9 +17,9 @@ var Twitter = require('twitter');
 var env = require('dotenv').config();
 
 //process envelops
-var wundergroundKey = env.WUNDERGROUND_KEY;
+var wundergroundKey = process.env.WUNDERGROUND_KEY;
 console.log ("wundergroundkey: " + wundergroundKey);
-var luisKey = env.LUIS_KEY;
+var luisKey = process.env.LUIS_KEY;
 console.log("luisKey: " + luisKey)
 
 
@@ -51,8 +48,8 @@ server.get('/', restify.serveStatic({
 var PersonalityInsightsV3 = require('watson-developer-cloud/personality-insights/v3');
 
 var personality_insights = new PersonalityInsightsV3({
-  username: 'b1e23542-a760-44b5-8ab5-63a6afef6873',
-  password: 'YUacERiVGIBn',
+  username: process.env.WATSON_USERNAME,
+  password: process.env.WATSON_PASSWORD,
   version_date: '2016-10-19'
 });
 
@@ -75,9 +72,10 @@ server.post('/api/messages', connector.listen());
 
 //Intents via Luis
 
-var recognizer = new builder.LuisRecognizer('https://api.projectoxford.ai/luis/v1/application?id=bab2367b-2314-4ab0-9e29-4ca5f78722c5&subscription-key=ea27b6d8709c4597b389de3cf26895f9');
-//var recognizer = new builder.LuisRecognizer('https://api.projectoxford.ai/luis/v1/application?id=bab2367b-2314-4ab0-9e29-4ca5f78722c5&subscription-key=%s', luisKey);
-console.log ('https://api.projectoxford.ai/luis/v1/application?id=bab2367b-2314-4ab0-9e29-4ca5f78722c5&subscription-key=%s', luisKey);
+var url = 'https://api.projectoxford.ai/luis/v1/application?id=bab2367b-2314-4ab0-9e29-4ca5f78722c5&subscription-key=' + luisKey;
+console.log (url);
+var recognizer = new builder.LuisRecognizer(url);
+
 // try encoding query (add &A
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 //var dialog = new builder.IntentDialog({ recognizers: [recognizer] });
@@ -139,14 +137,16 @@ intents.matches('Help', [
 intents.matches('Tweets', 
     function (session,args) {
             var name = builder.EntityRecognizer.findEntity(args.entities, 'TwitterNaam');
-            var twitterNaam = name.entity;
-            console.log("gevonden:" + twitterNaam);
-            if (twitterNaam) {
-                session.beginDialog('/twitter', twitterNaam);
+            try {
+                if (name.entity) {
+                    session.beginDialog('/twitter', name.entity);
+                    }
+                else {
+                    session.send("Van die naam kan ik geen tweets vinden. Check ajb de spelling (gebruik geen @ voor de naam).");
+                    }
             }
-            
-            else {
-            session.send("Van die naam kan ik geen tweets vinden. Check ajb de spelling (gebruik geen @ voor de naam).");
+            catch(e) {
+                console.log ("geen Twitternaam gevonden")
             }
         
     }); //Tweets
