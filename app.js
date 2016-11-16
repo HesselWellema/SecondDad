@@ -14,7 +14,7 @@ var restify = require('restify');
 var builder = require('botbuilder');
 var http = require('http'); 
 var Twitter = require('twitter');
-//var env = require('dotenv').config();
+var env = require('dotenv').config();
 
 //process envelops
 var wundergroundKey = process.env.WUNDERGROUND_KEY;
@@ -55,12 +55,12 @@ var personality_insights = new PersonalityInsightsV3({
 
 //create twitter client
 
-//var twitterClient = new Twitter({
- //   consumer_key: env.consumer_key,
-  //  consumer_secret: env.consumer_secret,
-  //  access_token_key: env.access_token_key,
-  //  access_token_secret: env.access_token_secret
-//});
+var twitterClient = new Twitter({
+    consumer_key: process.env.consumer_key,
+    consumer_secret: process.env.consumer_secret,
+    access_token_key: process.env.access_token_key,
+    access_token_secret: process.env.access_token_secret
+});
 
 // Create chat bot
 var connector = new builder.ChatConnector({
