@@ -45,22 +45,22 @@ server.get('/', restify.serveStatic({
 
 
 // Watson Setup
-//var PersonalityInsightsV3 = require('watson-developer-cloud/personality-insights/v3');
+var PersonalityInsightsV3 = require('watson-developer-cloud/personality-insights/v3');
 
-//var personality_insights = new PersonalityInsightsV3({
-//  username: process.env.WATSON_USERNAME,
-//  password: process.env.WATSON_PASSWORD,
-//  version_date: '2016-10-19'
-//});
+var personality_insights = new PersonalityInsightsV3({
+  username: process.env.WATSON_USERNAME,
+  password: process.env.WATSON_PASSWORD,
+  version_date: '2016-10-19'
+});
 
 //create twitter client
 
-var twitterClient = new Twitter({
-    consumer_key: env.consumer_key,
-    consumer_secret: env.consumer_secret,
-    access_token_key: env.access_token_key,
-    access_token_secret: env.access_token_secret
-});
+//var twitterClient = new Twitter({
+ //   consumer_key: env.consumer_key,
+  //  consumer_secret: env.consumer_secret,
+  //  access_token_key: env.access_token_key,
+  //  access_token_secret: env.access_token_secret
+//});
 
 // Create chat bot
 var connector = new builder.ChatConnector({
