@@ -14,7 +14,7 @@ var restify = require('restify');
 var builder = require('botbuilder');
 var http = require('http'); 
 var Twitter = require('twitter');
-var env = require('dotenv').config();
+//var env = require('dotenv').config();
 
 //process envelops
 var wundergroundKey = process.env.WUNDERGROUND_KEY;
