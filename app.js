@@ -18,9 +18,7 @@ var env = require('dotenv').config();
 
 //process envelops
 var wundergroundKey = process.env.WUNDERGROUND_KEY;
-console.log ("wundergroundkey: " + wundergroundKey);
 var luisKey = process.env.LUIS_KEY;
-console.log("luisKey: " + luisKey)
 
 
 //localisatie
@@ -73,7 +71,6 @@ server.post('/api/messages', connector.listen());
 //Intents via Luis
 
 var url = 'https://api.projectoxford.ai/luis/v1/application?id=bab2367b-2314-4ab0-9e29-4ca5f78722c5&subscription-key=' + luisKey;
-console.log (url);
 var recognizer = new builder.LuisRecognizer(url);
 
 // try encoding query (add &A
@@ -392,16 +389,23 @@ bot.dialog('/Analyse', [
         function (err, response) {
             if (err) 
                   console.log('error:', err);
-            else {
-                //var data = JSON.stringify(response, null, 2);
-                session.send ("profiel van " + naam + " gebaseerd op " + aantal + "tweets: ")
-                session.send("Openness:          "+ Math.round(response.personality[0].percentile*100) + " %");
-                session.send("Conscientiousness  "+ Math.round(response.personality[1].percentile*100) + " %");
-                session.send("Extraversion       "+ Math.round(response.personality[2].percentile*100) + " %");
-                session.send("Agreeableness      "+ Math.round(response.personality[3].percentile*100) + " %");
-                session.send("Emotional range    "+ Math.round(response.personality[4].percentile*100) + " %");
-                }
-            });  
-        session.endDialog();  
+            else {            
+                builder.Prompts.choice(session, "Onderstaand het profiel van @" + naam + " klik voor meer details", ["Openness: "+ Math.round(response.personality[0].percentile*100) + " %", "Conscientiousness: "+ Math.round(response.personality[1].percentile*100) + " %", "Extraversion: "+ Math.round(response.personality[2].percentile*100) + " %", "Agreeableness: "+ Math.round(response.personality[3].percentile*100) + " %", "Emotional range: "+ Math.round(response.personality[4].percentile*100) + " %", "Ik hoef niet meer te weten"]);
+                };
+                
+                    
+            },
+        function (session,results)    {
+                console.log ("sleutels: " + Object.keys(results.respone));
+                console.log ("antwoord: " + results.response);
+
+                } 
+            
+            
+            );  
+
+
+        
+    
     })
 }]) //einde psycho
