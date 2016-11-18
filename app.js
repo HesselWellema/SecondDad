@@ -358,8 +358,10 @@ bot.dialog('/twitter', [
                     }
                 }
             }
+
+        else {session.endDialog ("Het is me niet gelukt om de tweets op te halen van " + twitterName)} // anders geven we de controle terug aan de root.
        
-       session.endDialog();  
+       session.endDialog(keuzes);  
     })
 }]) //einde twitter
 
@@ -387,9 +389,13 @@ bot.dialog('/Analyse', [
              //als geen problemen gaan we tekst bestand vullen
              if (!error) { 
                 for (var i = 0; i < aantal-1; i++) { 
-                    tekst = tekst + tweets[i].text;      
+                      try {
+                          tekst = tekst + tweets[i].text;
+                          }
+                      catch(e) {
+                           break;
+                          }
                     }
-              console.log("kom ik hier?")
                } // einde tekstbestand vullen
             
             else {session.endDialog ("Het is me niet gelukt om de tweets op te halen van " + session.dialogData.naam)} // anders geven we de controle terug aan de root.
