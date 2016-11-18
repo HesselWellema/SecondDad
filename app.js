@@ -1,4 +1,7 @@
-//Internal server error fixen
+// koppeling met Watson
+// twitter afmaken
+// alles naar .env repareren
+
 
 //Some functions
 
@@ -54,10 +57,10 @@ var personality_insights = new PersonalityInsightsV3({
 //create twitter client
 
 var twitterClient = new Twitter({
- consumer_key: process.env.consumer_key,
-  consumer_secret: process.env.consumer_secret,
-  access_token_key: process.env.access_token_key,
-  access_token_secret: process.env.access_token_secret
+ consumer_key: env.consumer_key,
+  consumer_secret: env.consumer_secret,
+  access_token_key: env.access_token_key,
+  access_token_secret: env.access_token_secret
   });
 
 // Create chat bot
@@ -70,8 +73,11 @@ server.post('/api/messages', connector.listen());
 
 //Intents via Luis
 
+//var recognizer = new builder.LuisRecognizer('https://api.projectoxford.ai/luis/v1/application?id=bab2367b-2314-4ab0-9e29-4ca5f78722c5&subscription-key=ea27b6d8709c4597b389de3cf26895f9');
+
 var url = 'https://api.projectoxford.ai/luis/v1/application?id=bab2367b-2314-4ab0-9e29-4ca5f78722c5&subscription-key=' + luisKey;
 var recognizer = new builder.LuisRecognizer(url);
+
 
 // try encoding query (add &A
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
@@ -134,16 +140,14 @@ intents.matches('Help', [
 intents.matches('Tweets', 
     function (session,args) {
             var name = builder.EntityRecognizer.findEntity(args.entities, 'TwitterNaam');
-            try {
-                if (name.entity) {
-                    session.beginDialog('/twitter', name.entity);
-                    }
-                else {
-                    session.send("Van die naam kan ik geen tweets vinden. Check ajb de spelling (gebruik geen @ voor de naam).");
-                    }
+            var twitterNaam = name.entity;
+            console.log("gevonden:" + twitterNaam);
+            if (twitterNaam) {
+                session.beginDialog('/twitter', twitterNaam);
             }
-            catch(e) {
-                console.log ("geen Twitternaam gevonden")
+            
+            else {
+            session.send("Van die naam kan ik geen tweets vinden. Check ajb de spelling (gebruik geen @ voor de naam).");
             }
         
     }); //Tweets
@@ -361,51 +365,72 @@ bot.dialog('/twitter', [
 
 
 bot.dialog('/Analyse', [
+    
+    //waterval stap 1 van 2
     function (session, naam) {
-        var aantal = 1000
-        var params = {screen_name: naam, count: aantal};
-        var tekst = "";
-        console.log("voor wie: " + naam);
 
-        twitterClient.get('statuses/user_timeline', params, function(error, tweets, response) {
-            if (!error) {
+        session.dialogData.naam = naam;
+        builder.Prompts.choice(session, "Wat wil je weten over " + naam +" ?", "Big 5 Karaktertrekken|Belangrijkste behoeften|Belangrijkste waarden");
+    }, //einde stap 1 van 2
+    
+    //waterval stap 2 van 2
+    function (session,results) {
+        if (results.response) {
+            console.log ("keuze: " + results.response.entity);
+            var aantal = 200;
+            var params = {screen_name: session.dialogData.naam, count: aantal};
+            var tekst = "";
+            console.log("voor wie: " + session.dialogData.naam);
+
+            //twitter feeds ophalen
+            twitterClient.get('statuses/user_timeline', params, function(error, tweets, response) { 
+             //als geen problemen gaan we tekst bestand vullen
+             if (!error) { 
                 for (var i = 0; i < aantal-1; i++) { 
-                    try {
-                        tekst = tekst + tweets[i].text;
+                    tekst = tekst + tweets[i].text;      
                     }
-                    catch(e) {
-                        break;
-                    }
-                }
-            } 
+              console.log("kom ik hier?")
+               } // einde tekstbestand vullen
+            
+            else {session.endDialog ("Het is me niet gelukt om de tweets op te halen van " + session.dialogData.naam)} // anders geven we de controle terug aan de root.
+        
             console.log ("aantal tweets verwerkt: " + i);
             aantal = i;
-       
-       personality_insights.profile({
-            text: tekst,
-            consumption_preferences: false
-            },
-            
-        function (err, response) {
-            if (err) 
-                  console.log('error:', err);
-            else {            
-                builder.Prompts.choice(session, "Onderstaand het profiel van @" + naam + " klik voor meer details", ["Openness: "+ Math.round(response.personality[0].percentile*100) + " %", "Conscientiousness: "+ Math.round(response.personality[1].percentile*100) + " %", "Extraversion: "+ Math.round(response.personality[2].percentile*100) + " %", "Agreeableness: "+ Math.round(response.personality[3].percentile*100) + " %", "Emotional range: "+ Math.round(response.personality[4].percentile*100) + " %", "Ik hoef niet meer te weten"]);
-                };
-                
-                    
-            },
-        function (session,results)    {
-                console.log ("sleutels: " + Object.keys(results.respone));
-                console.log ("antwoord: " + results.response);
 
-                } 
-            
-            
-            );  
-
-
-        
-    
-    })
-}]) //einde psycho
+            //persoonlijkheid bepalen op basis van twitted feedsbestand        
+            personality_insights.profile({ 
+                text: tekst,
+                consumption_preferences: false
+                },
+                //call back: bepalen eigenschappen op basis van keuze gebruiker: big 5, needs of waarden)
+                function (err, response) {
+                 if (err) {
+                     console.log('error:', err);
+                     session.endDialog("Sorry maar dat ging niet goed. Probeer het nog eens");
+                    }
+                 else {
+                       switch( results.response.entity) {
+                       case "Big 5 Karaktertrekken":
+                                session.send("Openness:          "+ Math.round(response.personality[0].percentile*100) + " %" );
+                                session.send("Conscientiousness  "+ Math.round(response.personality[1].percentile*100) + " %");
+                                session.send("Big Extraversi     "+ Math.round(response.personality[2].percentile*100) + " %");
+                                session.send("Agreeableness      "+ Math.round(response.personality[3].percentile*100) + " %");
+                                session.send("Emotional range    "+ Math.round(response.personality[4].percentile*100) + " %");
+                            break;
+                       case "Belangrijkste behoeften":
+                            session.send("Belangrijkste behoeften van " + session.dialogData.naam)
+                            break;
+                       default:
+                            session.send("Belangrijkste waarden van " + session.dialogData.naam)
+                       } //einde switch
+                       session.send (keuzes);
+                    } //einde else
+                });   //einde callback
+           }) // einde twitter feeds ophalen
+        } //einde als de gebruiker heeft gekozen.
+        //als de gebruiker geen keuze maakt in begin.
+        else {
+            session.send("ok");
+            }
+    } //einde stap 2 van 2
+]) //einde analyse waterval.
