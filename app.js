@@ -320,8 +320,7 @@ bot.dialog('/weerBepalen', [
                                 var data = JSON.parse(body);                       
                                 try {                                                        
                                     var voorspelling = data.forecast.txt_forecast.forecastday;
-                                    session.send (capitalize(voorspelling[1].title) + ". " + voorspelling[1].fcttext_metric);
-                                    session.send (capitalize(voorspelling[2].title) + ". " + voorspelling[2].fcttext_metric);
+                                    session.send (capitalize(voorspelling[1].title) + ". " + voorspelling[1].fcttext_metric + "/n" + capitalize(voorspelling[2].title) + ". " + voorspelling[2].fcttext_metric);
                                     session.send(keuzes);
                                     } // einde try
 
