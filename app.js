@@ -358,7 +358,10 @@ bot.dialog('/twitter', [
                 }
             }
 
-        else {session.endDialog ("Het is me niet gelukt om de tweets op te halen van " + twitterName)} // anders geven we de controle terug aan de root.
+        else {
+            console.log(error);
+            session.endDialog ("Het is me niet gelukt om de tweets op te halen van " + twitterName)
+        } // anders geven we de controle terug aan de root.
        
        session.endDialog(keuzes);  
     })
