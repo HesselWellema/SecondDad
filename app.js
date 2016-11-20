@@ -157,6 +157,7 @@ intents.matches('Analyse',
             var name = builder.EntityRecognizer.findEntity(args.entities, 'TwitterNaam');
             var twitterNaam = name.entity;
             if (twitterNaam) {
+                console.log("opstarten analyse voor: " + twitterNaam);
                 session.beginDialog('/Analyse', twitterNaam);
             }
             
@@ -395,6 +396,7 @@ bot.dialog('/Analyse', [
                           tekst = tekst + tweets[i].text;
                           }
                       catch(e) {
+                           console.log("fout: " + e)
                            break;
                           }
                     }
@@ -419,26 +421,50 @@ bot.dialog('/Analyse', [
                  else {
                        switch( results.response.entity) {
                        case "Big 5 Karaktertrekken":
-                                session.send("Openness:          "+ Math.round(response.personality[0].percentile*100) + " %" );
-                                session.send("Conscientiousness  "+ Math.round(response.personality[1].percentile*100) + " %");
-                                session.send("Big Extraversi     "+ Math.round(response.personality[2].percentile*100) + " %");
-                                session.send("Agreeableness      "+ Math.round(response.personality[3].percentile*100) + " %");
-                                session.send("Emotional range    "+ Math.round(response.personality[4].percentile*100) + " %");
-                            break;
+                                session.send(
+                                "Karaktertrekken van " + session.dialogData.naam + "\n\n" +
+                                "Openness:           "+ Math.round(response.personality[0].percentile*100) + " %" + "\n\n" +
+                                "Conscientiousness:  "+ Math.round(response.personality[1].percentile*100) + " %" + "\n\n" + 
+                                "Extraversion:       "+ Math.round(response.personality[2].percentile*100) + " %" + "\n\n" +
+                                "Agreeableness:      "+ Math.round(response.personality[3].percentile*100) + " %" + "\n\n" + 
+                                "Emotional range:    "+ Math.round(response.personality[4].percentile*100) + " %" + "\n\n" 
+                                );
+                                break;
                        case "Belangrijkste behoeften":
-                            session.send("Belangrijkste behoeften van " + session.dialogData.naam)
+                            session.send(
+                                "Behoeftes van    " + session.dialogData.naam + "\n\n" +
+                                "Challenge:       "+ Math.round(response.needs[0].percentile*100) + " %" + "\n\n" +
+                                "Closeness:       "+ Math.round(response.needs[1].percentile*100) + " %" + "\n\n" + 
+                                "Curiosity:       "+ Math.round(response.needs[2].percentile*100) + " %" + "\n\n" +
+                                "Excitement:      "+ Math.round(response.needs[3].percentile*100) + " %" + "\n\n" + 
+                                "Harmony:         "+ Math.round(response.needs[4].percentile*100) + " %" + "\n\n" +
+                                "Ideal:           "+ Math.round(response.needs[5].percentile*100) + " %" + "\n\n" + 
+                                "Libery:          "+ Math.round(response.needs[6].percentile*100) + " %" + "\n\n" +
+                                "Love:            "+ Math.round(response.needs[7].percentile*100) + " %" + "\n\n" + 
+                                "Practicality:    "+ Math.round(response.needs[8].percentile*100) + " %" + "\n\n" +
+                                "Self-expression: "+ Math.round(response.needs[9].percentile*100) + " %" + "\n\n" + 
+                                "Stability:       "+ Math.round(response.needs[10].percentile*100) + " %" + "\n\n" +
+                                "Structure:       "+ Math.round(response.needs[11].percentile*100) + " %" + "\n\n" 
+                                );
                             break;
                        default:
-                            session.send("Belangrijkste waarden van " + session.dialogData.naam)
+                            session.send(
+                                "Waarden van       " + session.dialogData.naam + "\n\n" +
+                                "Conservation:     "+ Math.round(response.values[0].percentile*100) + " %" + "\n\n" +
+                                "Openess to change:"+ Math.round(response.values[1].percentile*100) + " %" + "\n\n" + 
+                                "Hedonism:         "+ Math.round(response.values[2].percentile*100) + " %" + "\n\n" +
+                                "Self enhancement: "+ Math.round(response.values[3].percentile*100) + " %" + "\n\n" + 
+                                "Self transcedence:"+ Math.round(response.values[4].percentile*100) + " %" + "\n\n" 
+                                );
                        } //einde switch
-                       session.send (keuzes);
+                       session.endDialog (keuzes);
                     } //einde else
                 });   //einde callback
            }) // einde twitter feeds ophalen
         } //einde als de gebruiker heeft gekozen.
         //als de gebruiker geen keuze maakt in begin.
         else {
-            session.send("ok");
+            session.endDialog("ok");
             }
     } //einde stap 2 van 2
 ]) //einde analyse waterval.
