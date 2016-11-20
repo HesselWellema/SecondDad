@@ -440,6 +440,7 @@ bot.dialog('/Analyse', [
                                  response.personality[3].name + ": " + Math.round(response.personality[3].percentile*100) + " %" + "\n\n" + 
                                  response.personality[4].name + ": " + Math.round(response.personality[4].percentile*100) + " %" + "\n\n" 
                                 );
+                                builder.Prompts.confirm(session, "Wil je nog meer weten over " + session.dialogData.naam + "?");
                                 break;
                        case "Belangrijkste behoeften":
                                 console.log (response.needs);
@@ -463,7 +464,8 @@ bot.dialog('/Analyse', [
                                 response.needs[3].name + ": " + Math.round(response.needs[3].percentile*100) + " %" + "\n\n" + 
                                 response.needs[4].name + ": " + Math.round(response.needs[4].percentile*100) + " %" + "\n\n"
                                 );
-                            break;
+                                builder.Prompts.confirm(session, "Wil je nog meer weten over " + session.dialogData.naam + "?");
+                                break;
                        default:
                             //sorteren op percentage
                                 response.values.sort(function (a, b) {
@@ -484,9 +486,10 @@ bot.dialog('/Analyse', [
                                 response.values[3].name + ": " + Math.round(response.values[3].percentile*100) + " %" + "\n\n" + 
                                 response.values[4].name + ": " + Math.round(response.values[4].percentile*100) + " %" + "\n\n" 
                                 );
+                                builder.Prompts.confirm(session, "Wil je nog meer weten over " + session.dialogData.naam + "?");
                        } //einde switch
                        
-                      builder.Prompts.confirm(session, "Wil je nog meer weten over " + session.dialogData.naam + "?");
+                      
                       
                     } //einde else
                 });   //einde callback
