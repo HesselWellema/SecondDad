@@ -375,7 +375,7 @@ bot.dialog('/Analyse', [
     function (session, naam) {
 
         session.dialogData.naam = naam;
-        builder.Prompts.choice(session, "Wat wil je weten over " + naam +" ?", "Big 5 Karaktertrekken|Belangrijkste behoeften|Belangrijkste waarden");
+        builder.Prompts.choice(session, "Wat wil je weten over " + naam +" ?", "Big 5 Karaktertrekken|Belangrijkste behoeften|Waarden");
     }, //einde stap 1 van 3
     
     //waterval stap 2 van 3
@@ -396,8 +396,7 @@ bot.dialog('/Analyse', [
                           tekst = tekst + tweets[i].text;
                           }
                       catch(e) {
-                           console.log("fout: " + e)
-                           break;
+                          break;
                           }
                     }
                } // einde tekstbestand vullen
@@ -434,11 +433,11 @@ bot.dialog('/Analyse', [
                                 });
                                 session.send(
                                 "Karaktertrekken van " + session.dialogData.naam + "\n\n" +
-                                 response.personality[0].name + ": " + Math.round(response.personality[0].percentile*100) + " %" + "\n\n" +
-                                 response.personality[1].name + ": " + Math.round(response.personality[1].percentile*100) + " %" + "\n\n" + 
-                                 response.personality[2].name + ": " + Math.round(response.personality[2].percentile*100) + " %" + "\n\n" +
-                                 response.personality[3].name + ": " + Math.round(response.personality[3].percentile*100) + " %" + "\n\n" + 
-                                 response.personality[4].name + ": " + Math.round(response.personality[4].percentile*100) + " %" + "\n\n" 
+                                 response.personality[0].name + ": " + Math.round(response.personality[0].percentile*100) + " %" + "  \n" +
+                                 response.personality[1].name + ": " + Math.round(response.personality[1].percentile*100) + " %" + "  \n" + 
+                                 response.personality[2].name + ": " + Math.round(response.personality[2].percentile*100) + " %" + "  \n" +
+                                 response.personality[3].name + ": " + Math.round(response.personality[3].percentile*100) + " %" + "  \n" + 
+                                 response.personality[4].name + ": " + Math.round(response.personality[4].percentile*100) + " %" + "  \n" 
                                 );
                                 builder.Prompts.confirm(session, "Wil je nog meer weten over " + session.dialogData.naam + "?");
                                 break;
@@ -457,11 +456,11 @@ bot.dialog('/Analyse', [
                                 });
                                 console.log (response.needs);
                                 session.send(
-                                " 5 belangrijkste behoeftes van " + session.dialogData.naam + "\n\n" +
-                                response.needs[0].name + ": " + Math.round(response.needs[0].percentile*100) + " %" + "\n\n" +
-                                response.needs[1].name + ": " + Math.round(response.needs[1].percentile*100) + " %" + "\n\n" + 
-                                response.needs[2].name + ": " + Math.round(response.needs[2].percentile*100) + " %" + "\n\n" +
-                                response.needs[3].name + ": " + Math.round(response.needs[3].percentile*100) + " %" + "\n\n" + 
+                                "5 belangrijkste behoeftes van " + session.dialogData.naam + "\n\n" +
+                                response.needs[0].name + ": " + Math.round(response.needs[0].percentile*100) + " %" + "  \n" +
+                                response.needs[1].name + ": " + Math.round(response.needs[1].percentile*100) + " %" + "  \n" + 
+                                response.needs[2].name + ": " + Math.round(response.needs[2].percentile*100) + " %" + "  \n" +
+                                response.needs[3].name + ": " + Math.round(response.needs[3].percentile*100) + " %" + "  \n" + 
                                 response.needs[4].name + ": " + Math.round(response.needs[4].percentile*100) + " %" + "\n\n"
                                 );
                                 builder.Prompts.confirm(session, "Wil je nog meer weten over " + session.dialogData.naam + "?");
@@ -480,11 +479,11 @@ bot.dialog('/Analyse', [
                                 });
                             session.send(
                                 "Waarden van " + session.dialogData.naam + "\n\n" +
-                                response.values[0].name + ": " + Math.round(response.values[0].percentile*100) + " %" + "\n\n" +
-                                response.values[1].name + ": " + Math.round(response.values[1].percentile*100) + " %" + "\n\n" + 
-                                response.values[2].name + ": " + Math.round(response.values[2].percentile*100) + " %" + "\n\n" +
-                                response.values[3].name + ": " + Math.round(response.values[3].percentile*100) + " %" + "\n\n" + 
-                                response.values[4].name + ": " + Math.round(response.values[4].percentile*100) + " %" + "\n\n" 
+                                response.values[0].name + ": " + Math.round(response.values[0].percentile*100) + " %" + "  \n" +
+                                response.values[1].name + ": " + Math.round(response.values[1].percentile*100) + " %" + "  \n" + 
+                                response.values[2].name + ": " + Math.round(response.values[2].percentile*100) + " %" + "  \n" +
+                                response.values[3].name + ": " + Math.round(response.values[3].percentile*100) + " %" + "  \n" + 
+                                response.values[4].name + ": " + Math.round(response.values[4].percentile*100) + " %" + "  \n" 
                                 );
                                 builder.Prompts.confirm(session, "Wil je nog meer weten over " + session.dialogData.naam + "?");
                        } //einde switch
