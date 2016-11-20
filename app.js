@@ -1,6 +1,5 @@
-// koppeling met Watson
-// twitter afmaken
-// alles naar .env repareren
+//menu toevoegen
+// proactive gedrag onderzoeken
 
 
 //Some functions
@@ -376,6 +375,7 @@ bot.dialog('/Analyse', [
 
         session.dialogData.naam = naam;
         builder.Prompts.choice(session, "Wat wil je weten over " + naam +" ?", "Big 5 Karaktertrekken|Belangrijkste behoeften|Waarden");
+
     }, //einde stap 1 van 3
     
     //waterval stap 2 van 3
