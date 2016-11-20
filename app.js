@@ -371,15 +371,15 @@ bot.dialog('/twitter', [
 
 bot.dialog('/Analyse', [
     
-    //waterval stap 1 van 2
+    //waterval stap 1 van 3
     function (session, naam) {
 
         session.dialogData.naam = naam;
         builder.Prompts.choice(session, "Wat wil je weten over " + naam +" ?", "Big 5 Karaktertrekken|Belangrijkste behoeften|Belangrijkste waarden");
-    }, //einde stap 1 van 2
+    }, //einde stap 1 van 3
     
-    //waterval stap 2 van 2
-    function (session,results) {
+    //waterval stap 2 van 3
+    function (session,results,next) {
         if (results.response) {
             console.log ("keuze: " + results.response.entity);
             var aantal = 200;
@@ -457,7 +457,9 @@ bot.dialog('/Analyse', [
                                 "Self transcedence:"+ Math.round(response.values[4].percentile*100) + " %" + "\n\n" 
                                 );
                        } //einde switch
-                       session.endDialog (keuzes);
+                       
+                      builder.Prompts.confirm(session, "Wil je nog meer weten over " + session.dialogData.naam + "?");
+                      
                     } //einde else
                 });   //einde callback
            }) // einde twitter feeds ophalen
@@ -466,5 +468,18 @@ bot.dialog('/Analyse', [
         else {
             session.endDialog("ok");
             }
-    } //einde stap 2 van 2
+            
+    }, //einde stap 2 van 3
+    // stap 3 van 3
+    function (session,results) {
+        if (results.response) {
+            session.replaceDialog('/Analyse', session.dialogData.naam);
+            }
+        else {
+            session.endDialog("ok ", keuzes);
+            } 
+
+
+    } // einde stap 3 van 3
+
 ]) //einde analyse waterval.
