@@ -1,4 +1,4 @@
-//menu toevoegen
+//koppeling horoscope
 // proactive gedrag onderzoeken
 
 
@@ -25,7 +25,7 @@ var luisKey = process.env.LUIS_KEY;
 
 //localisatie
 
-var keuzes = ["Wat wil je nu doen?","Wat zal ik nu voor je doen?","Hoe kan ik je verder helpen?"];
+var keuzes = ["Ok. Wat wil je nu doen?","OK. Wat zal ik nu voor je doen?","Prima. Hoe kan ik je verder helpen?"];
 
 
 //=========================================================
@@ -128,7 +128,7 @@ intents.matches('weerVoorspellen',
 
 intents.matches('Help', [
     function (session) {
-        session.send ("Ik kan niet zoveel. Vraag me het weer via 'Weer' of het weer in een bepaalde stad. Met Echo praat ik je na")
+        session.send ("Ik kan nog niet zoveel. 'Menu' toont een menu met mijn mogelijkheden");
     },
     function (session, results) {
         session.endDialog(keuzes);
@@ -181,7 +181,17 @@ intents.matches('Cancel', [
 
         }
     }
-])  
+]);  
+
+intents.matches('Menu', [
+    function (session) {
+        session.beginDialog('/menu');
+    },
+    function (session, results) {
+        session.endDialog(keuzes);
+    }
+]); //menu
+
 
 intents.onDefault(
     [ 
@@ -198,7 +208,70 @@ intents.onDefault(
 
     ])
 
-//Profiel bepalen
+
+//Menu tonen
+
+
+bot.dialog('/menu', [
+    function (session) {
+        builder.Prompts.choice(session, "Maak een keuze:", 'Wat is het weer in ...|Weersvoorspelling in ...|Twitterfeeds tonen van ...|Persoonlijkheidtest|Menu verlaten');
+    },
+
+    function (session, results) {
+
+        switch (results.response.index) {
+
+            case 0:
+                session.beginDialog('/askCity', true);
+                break;
+            case 1:
+                session.beginDialog('/askCity', false);
+                break;
+            case 2:
+                session.beginDialog('/askTwitterName', false);
+                break;
+            case 3:
+                session.beginDialog('/askTwitterName', true);
+                break;    
+            default:
+                session.endDialog();
+                break;
+        }
+    },
+    function (session) {
+        // Reload menu
+        session.replaceDialog('/menu');
+    }
+]).reloadAction('showMenu', null, { matches: /^(menu|back)/i });
+
+
+
+bot.dialog('/askCity', [
+
+    function (session, huidigWeer) {
+        session.dialogData.huidigWeer = huidigWeer;
+        console.log("huidig weer? " + session.dialogData.huidigWeer);
+        builder.Prompts.text(session, "Voor welke stad wil je dat?");
+    },
+    function (session,results) {
+        if (session.dialogData.huidigWeer) {session.beginDialog('/weerBepalen', results.response);}
+        else {session.beginDialog('/weerVoorspellen', results.response);}
+    },
+]),
+
+
+bot.dialog('/askTwitterName', [
+
+    function (session, Analyse) {
+        session.dialogData.Analyse = Analyse;
+        builder.Prompts.text(session, "Voor welke Twitternaam wil je dat?");
+    },
+    function (session,results) {
+        if (session.dialogData.Analyse) {session.beginDialog('/Analyse', results.response);}
+        else {session.beginDialog('/twitter', results.response);}
+    },
+]),
+
 
 bot.dialog('/ensureProfile', [
     function (session, args, next) {
@@ -284,17 +357,16 @@ bot.dialog('/weerBepalen', [
                                     .tap(builder.CardAction.openUrl(session, conditions.forecast_url))
                                      ]);
                                     session.send(msg);
-                                    session.send(keuzes);
+                                    session.endDialog(keuzes);  
                                      } //einde try
                                 catch(e) {
                                     session.send("ik probeerde het weer in %s te bepalen maar dat ging niet goed. Probeer een andere plaats (in de buurt)",stad);
-                                    session.send(keuzes);
                                     console.log(body)
+                                    session.endDialog(keuzes);  
                                     }    
                             }); //eind response.on(end)
                     }) // einde http.get 
-
-        session.endDialog();    
+  
      },
    ]); //einde weer bepalen
 
@@ -321,20 +393,18 @@ bot.dialog('/weerBepalen', [
                                 try {                                                        
                                     var voorspelling = data.forecast.txt_forecast.forecastday;
                                     session.send (capitalize(voorspelling[1].title) + ". " + voorspelling[1].fcttext_metric + "\n\n" + capitalize(voorspelling[2].title) + ". " + voorspelling[2].fcttext_metric);
-                                    session.send(keuzes);
+                                    session.endDialog(keuzes);   
+
+                                    
                                     } // einde try
 
                                   catch(e) {
                                     session.send("ik probeerde het weer te voorspellen in %s maar dat ging niet goed. Probeer een andere plaats (in de buurt)",stad);
-                                    session.send(keuzes);
-                                    
+                                    session.endDialog(keuzes);   
                                 }  // einde catch  
 
                             }); //eind response.on(end)
                     }) // einde http.get 
-        
-
-        session.endDialog();    
      },
    ]); //einde weer bepalen
 
@@ -374,7 +444,7 @@ bot.dialog('/Analyse', [
     function (session, naam) {
 
         session.dialogData.naam = naam;
-        builder.Prompts.choice(session, "Wat wil je weten over " + naam +" ?", "Big 5 Karaktertrekken|Belangrijkste behoeften|Waarden");
+        builder.Prompts.choice(session, "Wat wil je weten over " + naam +" ?", "Big 5 Karaktertrekken|Belangrijkste behoeften|Waarden|Stoppen");
 
     }, //einde stap 1 van 3
     
@@ -418,8 +488,8 @@ bot.dialog('/Analyse', [
                      session.endDialog("Sorry maar dat ging niet goed. Probeer het nog eens");
                     }
                  else {
-                       switch( results.response.entity) {
-                       case "Big 5 Karaktertrekken":
+                       switch( results.response.index) {
+                       case 0:
                                 //sorteren op percentage
                                 response.personality.sort(function (a, b) {
                                     if (a.percentile < b.percentile) {
@@ -441,7 +511,7 @@ bot.dialog('/Analyse', [
                                 );
                                 builder.Prompts.confirm(session, "Wil je nog meer weten over " + session.dialogData.naam + "?");
                                 break;
-                       case "Belangrijkste behoeften":
+                       case 1:
                                 console.log (response.needs);
                                 //sorteren op percentage
                                 response.needs.sort(function (a, b) {
@@ -465,7 +535,7 @@ bot.dialog('/Analyse', [
                                 );
                                 builder.Prompts.confirm(session, "Wil je nog meer weten over " + session.dialogData.naam + "?");
                                 break;
-                       default:
+                       case 2:
                             //sorteren op percentage
                                 response.values.sort(function (a, b) {
                                     if (a.percentile < b.percentile) {
@@ -486,6 +556,8 @@ bot.dialog('/Analyse', [
                                 response.values[4].name + ": " + Math.round(response.values[4].percentile*100) + " %" + "  \n" 
                                 );
                                 builder.Prompts.confirm(session, "Wil je nog meer weten over " + session.dialogData.naam + "?");
+                        default:
+                            session.endDialog(keuzes);
                        } //einde switch
                        
                       
@@ -496,7 +568,7 @@ bot.dialog('/Analyse', [
         } //einde als de gebruiker heeft gekozen.
         //als de gebruiker geen keuze maakt in begin.
         else {
-            session.endDialog("ok");
+            session.endDialog(keuzes);
             }
             
     }, //einde stap 2 van 3
@@ -506,7 +578,7 @@ bot.dialog('/Analyse', [
             session.replaceDialog('/Analyse', session.dialogData.naam);
             }
         else {
-            session.endDialog("ok ", keuzes);
+            session.endDialog(keuzes);
             } 
 
 
