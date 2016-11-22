@@ -355,7 +355,7 @@ bot.dialog('/weerBepalen', [
                                     .textFormat(builder.TextFormat.xml)
                                     .attachments([
                                     new builder.HeroCard(session)
-                                    .title(stad)
+                                    //.title(stad)
                                     .text(capitalize(conditions.weather) + " in " + stad + " op dit moment en een gevoelstemperatuur van " + conditions.feelslike_c + " graden Celsius. De luchtvochtigheid is " + conditions.relative_humidity + " en de wind komt uit " + conditions.wind_dir + " met " + conditions.wind_kph + " km/u")
                                     .images([builder.CardImage.create(session, conditions.icon_url)])
                                     .tap(builder.CardAction.openUrl(session, conditions.forecast_url))
@@ -616,7 +616,7 @@ bot.dialog('/astrologie', [
             .title(sign.name)
             .subtitle("Element: " + sign.about.element)
             .text("Strengths: " + "  \n" + sterktes + "  \n" + "Weaknesses: " + "  \n" + zwaktes)
-            .images([builder.CardImage.create(session, 'http://65.media.tumblr.com/avatar_f349b770a991_128.png')])
+            //.images([builder.CardImage.create(session, 'http://65.media.tumblr.com/avatar_f349b770a991_128.png')])
             //.tap(builder.CardAction.openUrl(session, conditions.forecast_url))
             ]);
             session.send(msg);
