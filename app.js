@@ -17,6 +17,7 @@ var builder = require('botbuilder');
 var http = require('http'); 
 var Twitter = require('twitter');
 var env = require('dotenv').config();
+var mzsi = require('mzsi');
 
 //process envelops
 var wundergroundKey = process.env.WUNDERGROUND_KEY;
@@ -214,7 +215,7 @@ intents.onDefault(
 
 bot.dialog('/menu', [
     function (session) {
-        builder.Prompts.choice(session, "Maak een keuze:", 'Wat is het weer in ...|Weersvoorspelling in ...|Twitterfeeds tonen van ...|Persoonlijkheidtest|Menu verlaten');
+        builder.Prompts.choice(session, "Maak een keuze:", 'Wat is het weer in ...|Weersvoorspelling in ...|Twitterfeeds tonen van ...|Persoonlijkheidtest|Astrologie|Menu verlaten');
     },
 
     function (session, results) {
@@ -232,6 +233,9 @@ bot.dialog('/menu', [
                 break;
             case 3:
                 session.beginDialog('/askTwitterName', true);
+                break;   
+            case 4:
+                session.beginDialog('/astrologie');
                 break;    
             default:
                 session.endDialog();
@@ -585,3 +589,47 @@ bot.dialog('/Analyse', [
     } // einde stap 3 van 3
 
 ]) //einde analyse waterval.
+
+
+bot.dialog('/astrologie', [
+    function (session) {
+        builder.Prompts.time (session, "Wanneer ben je geboren?",{maxRetries: 3, retryPrompt: "Dat snap ik niet. Probeer MM/DD/JJJJ"});
+        },
+    function (session,results) {
+        var time = builder.EntityRecognizer.resolveTime([results.response]);
+        var maand = time.getMonth() + 1;
+        var dag = time.getDate();
+        var jaar = time.getFullYear();
+        //dierenriem bepalen op basis van dag en Maand
+        var sign = mzsi(maand, dag);
+        console.log (sign);
+        var strength = sign.about.keywords.strength;
+        var weakness = sign.about.keywords.weakness;
+        sterktes = '';
+        for (var i = 0; i < strength.length; i++) {sterktes = sterktes + strength[i] + ", "};
+        zwaktes = '';
+        for (var i = 0; i < weakness.length; i++) {zwaktes = zwaktes + weakness[i] + ", "};
+        var msg = new builder.Message(session)
+            .textFormat(builder.TextFormat.xml)
+            .attachments([
+            new builder.HeroCard(session)
+            .title(sign.name)
+            .subtitle("Element: " + sign.about.element)
+            .text("Strengths: " + "  \n" + sterktes + "  \n" + "Weaknesses: " + "  \n" + zwaktes)
+            .images([builder.CardImage.create(session, 'http://65.media.tumblr.com/avatar_f349b770a991_128.png')])
+            //.tap(builder.CardAction.openUrl(session, conditions.forecast_url))
+            ]);
+            session.send(msg);
+            builder.Prompts.confirm(session, "Nog een geboortedatum proberen?");
+            
+        },
+
+        function (session,results) {
+        if (results.response) {
+            session.replaceDialog('/astrologie');
+            }
+        else {
+            session.endDialog(keuzes);
+            } 
+        }
+]) // einde astrology

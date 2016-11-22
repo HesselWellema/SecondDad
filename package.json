@@ -26,6 +26,7 @@
     "dotenv": "^2.0.0",
     "http": "0.0.0",
     "https": "^1.0.0",
+    "mzsi": "^1.2.0",
     "restify": "^4.1.1",
     "twitter": "^1.4.0",
     "watson-developer-cloud": "^2.9.0",
