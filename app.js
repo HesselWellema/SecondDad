@@ -613,8 +613,8 @@ bot.dialog('/astrologie', [
             .textFormat(builder.TextFormat.xml)
             .attachments([
             new builder.HeroCard(session)
-            .title(sign.name + "(element: " + sign.about.element +  ")")
-            .text("Strengths: " + "  \n" + sterktes + "  \n" + "Weaknesses: " + "  \n" + zwaktes)
+            .title(sign.name + " (element: " + sign.about.element +  ")")
+            .text(sign.name + " (element: " + sign.about.element +  ")" + "  \n" + "Strengths: " + sterktes + "  \n" + "Weaknesses: " + "  \n" + zwaktes)
             //.images([builder.CardImage.create(session, 'http://65.media.tumblr.com/avatar_f349b770a991_128.png')])
             //.tap(builder.CardAction.openUrl(session, conditions.forecast_url))
             ]);
